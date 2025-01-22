@@ -1,10 +1,9 @@
 import os
 import pymupdf
+import firebase_admin
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-
-folder_path = "data"
-output_path = "output.txt"
+from firebase_admin import credentials, firestore
 
 def template(prev, curr, next):
     return f"""
@@ -45,6 +44,7 @@ def create_model(groq_api_key):
     )
 
 def lect_gen():
+    folder_path = "data"
     files = os.listdir(folder_path)
     lect_script = []
 
@@ -56,23 +56,26 @@ def lect_gen():
     llm = create_model(llm_key)
     
     doc = pymupdf.open(f"{folder_path}\\{files[int(choice)]}")
-    with open(output_path, "w", encoding="utf-8") as txt_file:
-        for i in range(len(doc)):
-            prev_slide = "None"
-            next_slide = "None"
-            current_slide = doc[i].get_text()
-            if i > 0: prev_slide = lect_script[i-1]
-            if i < len(doc) - 1: next_slide = doc[i+1].get_text()
-            
-            message = template(prev_slide, current_slide, next_slide)
-            response = llm.invoke(message).content
-            lect_script.append(response)
-            
-            txt_file.write(f"--- Page {i + 1} ---\n")
-            txt_file.write(response)
-            txt_file.write("\n" + "-" * 20 + "\n")
+    for i in range(len(doc)):
+        prev_slide = "None"
+        next_slide = "None"
+        current_slide = doc[i].get_text()
+        if i > 0: prev_slide = lect_script[i-1]
+        if i < len(doc) - 1: next_slide = doc[i+1].get_text()
+        
+        message = template(prev_slide, current_slide, next_slide)
+        response = llm.invoke(message).content
+        lect_script.append(response)
 
+    cred = credentials.Certificate("firebase_config.json")
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
 
+    lecture = {
+        "title": f"{files[int(choice)]}",
+        "script": lect_script
+    }
+    db.collection("lect_scripts").document(f"{files[int(choice)]}").set(lecture)
 
 if __name__ == "__main__":
     lect_gen()

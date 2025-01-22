@@ -1,3 +1,4 @@
 pymupdf
 python-dotenv
 langchain_groq
+firebase_admin

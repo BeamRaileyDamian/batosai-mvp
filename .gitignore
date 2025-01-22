@@ -1,4 +1,5 @@
 output.txt
 venv
 .env
+firebase_config.json
 data
