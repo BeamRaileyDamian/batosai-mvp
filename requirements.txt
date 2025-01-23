@@ -1,4 +1,7 @@
 pymupdf
+supabase
 python-dotenv
 langchain_groq
 firebase_admin
+streamlit_js_eval
+streamlit-pdf-viewer

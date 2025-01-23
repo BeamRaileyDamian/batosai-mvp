@@ -3,6 +3,7 @@ import pymupdf
 import firebase_admin
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
+from supabase import create_client, Client
 from firebase_admin import credentials, firestore
 
 def template(prev, curr, next):
@@ -43,6 +44,15 @@ def create_model(groq_api_key):
         temperature=0
     )
 
+def upload_pdf(file_path, storage_path, supabase_url, supabase_api_key, bucket_name):
+    supabase: Client = create_client(supabase_url, supabase_api_key)
+    try:
+        with open(file_path, "rb") as file:
+            response = supabase.storage.from_(bucket_name).upload(storage_path, file)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
+
 def lect_gen():
     folder_path = "data"
     files = os.listdir(folder_path)
@@ -76,6 +86,16 @@ def lect_gen():
         "script": lect_script
     }
     db.collection("lect_scripts").document(f"{files[int(choice)]}").set(lecture)
+
+    supabase_url = os.environ.get("SUPABASE_URL")
+    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
+    bucket_name = os.environ.get("BUCKET_NAME")
+    bucket_folder = os.environ.get("BUCKET_FOLDER")
+
+    local_pdf_path = f"{folder_path}\\{files[int(choice)]}"
+    bucket_storage_path = f"{bucket_folder}/{files[int(choice)]}"
+    result = upload_pdf(local_pdf_path, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
+    print(result)
 
 if __name__ == "__main__":
     lect_gen()
