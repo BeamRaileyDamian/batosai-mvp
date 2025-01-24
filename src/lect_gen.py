@@ -70,9 +70,10 @@ def lect_gen(file, filename, lect_title):
             return False
         lect_script.append(response)
 
-    # Initially Firebase Firestore
-    cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+    # Initialize Firebase Firestore
+    if not firebase_admin._apps:
+        cred = credentials.Certificate("firebase_config.json")
+        firebase_admin.initialize_app(cred)
     db = firestore.client()
 
     # Upload lecture script
