@@ -4,7 +4,7 @@ import streamlit as st
 import streamlit_js_eval
 from streamlit_pdf_viewer import pdf_viewer
 
-set_sidebar()
+setup(st.session_state.curr_lect)
 screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
 url = st.session_state.lect_script["pdf_url"]
 response = requests.get(url)

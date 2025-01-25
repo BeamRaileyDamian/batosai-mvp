@@ -3,8 +3,7 @@ import firebase_admin
 import streamlit as st
 from firebase_admin import credentials, firestore
 
-st.set_page_config(layout="wide")
-set_sidebar()
+setup("bat.OS.AI")
 st.title("Welcome to bat.OS.AI! :robot_face:")
 
 def get_all_document_ids(collection_name):

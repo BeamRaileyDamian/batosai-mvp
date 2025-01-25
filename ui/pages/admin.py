@@ -6,8 +6,8 @@ from utils import *
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.lect_gen import lect_gen
 
+setup("Admin Panel")
 st.title("Create a Lecture")
-set_sidebar()
 
 if "lecture_title" not in st.session_state: st.session_state.lecture_title = ""
 uploaded_file = st.file_uploader("PDF Presentation", type="pdf")
