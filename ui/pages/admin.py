@@ -18,13 +18,15 @@ lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title
 # st.session_state.lecture_title = lect_title
 
 if st.button("Create"):
-    if uploaded_file and lect_title and uploaded_file.type == "application/pdf":
+    if lect_title in st.session_state.lect_ids:
+        st.warning("Lecture Title Already Exists")
+    elif uploaded_file and lect_title and uploaded_file.type == "application/pdf":
         filename = uploaded_file.name
         file = uploaded_file.read()
 
         response = lect_gen(file, filename, lect_title)
         if response: 
-            if st.session_state.lect_ids:
+            if "lect_ids" in st.session_state:
                 st.session_state.lect_ids.append(lect_title)
                 st.session_state.lect_ids.sort()
             st.success("Lecture Successully Created")

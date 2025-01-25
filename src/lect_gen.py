@@ -42,8 +42,14 @@ def upload_pdf(file, storage_path, supabase_url, supabase_api_key, bucket_name):
     supabase: Client = create_client(supabase_url, supabase_api_key)
     try:
         supabase.storage.from_(bucket_name).upload(storage_path, file)
-        return True
-    except:
+        public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
+        if public_url.endswith("?"): public_url = public_url[:-1]
+        return public_url
+    except Exception as e:
+        if e.to_dict()["code"] == "Duplicate":
+            public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
+            if public_url.endswith("?"): public_url = public_url[:-1]
+            return public_url
         return False
 
 def lect_gen(file, filename, lect_title):
@@ -66,9 +72,21 @@ def lect_gen(file, filename, lect_title):
         message = template(prev_slide, current_slide, next_slide)
         try: 
             response = llm.invoke(message).content
-        except:
+        except Exception as e:
+            print(e)
             return False
         lect_script.append(response)
+
+    # Initialize Supabase
+    supabase_url = os.environ.get("SUPABASE_URL")
+    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
+    bucket_name = os.environ.get("BUCKET_NAME")
+    bucket_folder = os.environ.get("BUCKET_FOLDER")
+
+    # Upload PDF file
+    bucket_storage_path = f"{bucket_folder}/{filename}"
+    publicUrl = upload_pdf(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
+    if not publicUrl: return False
 
     # Initialize Firebase Firestore
     if not firebase_admin._apps:
@@ -80,24 +98,16 @@ def lect_gen(file, filename, lect_title):
     lecture = {
         "title": lect_title,
         "script": lect_script,
-        "pdf": filename
+        "pdf": filename,
+        "pdf_url": publicUrl
     }
 
     try:
         db.collection("lect_scripts").document(lect_title).set(lecture)
-    except:
-        return False
-
-    # Initialize Supabase
-    supabase_url = os.environ.get("SUPABASE_URL")
-    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
-    bucket_name = os.environ.get("BUCKET_NAME")
-    bucket_folder = os.environ.get("BUCKET_FOLDER")
-
-    # Upload PDF file
-    bucket_storage_path = f"{bucket_folder}/{filename}"
-    result = upload_pdf(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
-    return result
+        return True
+    except Exception as e:
+        print(e)
+        return False    
 
 if __name__ == "__main__":
     lect_gen()
