@@ -99,7 +99,8 @@ def lect_gen(file, filename, lect_title):
         "title": lect_title,
         "script": lect_script,
         "pdf": filename,
-        "pdf_url": publicUrl
+        "pdf_url": publicUrl,
+        "slides_count": doc.page_count
     }
 
     try:
