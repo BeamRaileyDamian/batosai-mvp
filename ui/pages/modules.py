@@ -17,7 +17,6 @@ if not firebase_admin._apps:  # Ensure Firebase isn't initialized multiple times
     firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-if "lect_ids" not in st.session_state: st.session_state.lect_ids = []
 if "lect_script" not in st.session_state: st.session_state.lect_script = None
 if "curr_lect" not in st.session_state: st.session_state.curr_lect = None
 
@@ -35,3 +34,5 @@ if st.session_state.lect_ids:
                 st.session_state.lect_script = doc.to_dict()
 
             st.switch_page("pages/lesson.py")
+else:
+    st.info("No lectures to display.")
