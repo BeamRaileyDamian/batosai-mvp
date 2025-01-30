@@ -6,7 +6,17 @@ from langchain_groq import ChatGroq
 from supabase import create_client, Client
 from firebase_admin import credentials, firestore
 
-def template(prev, curr, next):
+def pre_template(curr):
+    return f"""
+
+    """
+
+def post_template(content):
+    return f"""
+
+    """
+
+def main_template(prev, curr, next):
     return f"""
         Context:
         - You are a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
@@ -34,7 +44,7 @@ def template(prev, curr, next):
 def create_model(groq_api_key):
     return ChatGroq(
         groq_api_key=groq_api_key,
-        model_name='llama-3.1-8b-instant',
+        model_name='llama-3.3-70b-versatile',     
         temperature=0
     )
 
@@ -52,6 +62,22 @@ def upload_pdf(file, storage_path, supabase_url, supabase_api_key, bucket_name):
             return public_url
         return False
 
+def script_gen(llm, prev_slide, current_slide, next_slide):
+    # preprocessing
+    
+
+    # main
+    message = main_template(prev_slide, current_slide, next_slide)
+    try: 
+        response = llm.invoke(message).content
+        return response
+    except Exception as e:
+        print(e)
+        return False
+    
+    # postprocessing
+
+
 def lect_gen(file, filename, lect_title):
     load_dotenv()
     lect_script = []
@@ -68,14 +94,10 @@ def lect_gen(file, filename, lect_title):
         current_slide = doc[i].get_text()
         if i > 0: prev_slide = lect_script[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
-        
-        message = template(prev_slide, current_slide, next_slide)
-        try: 
-            response = llm.invoke(message).content
-        except Exception as e:
-            print(e)
-            return False
-        lect_script.append(response)
+
+        response = script_gen(llm, prev_slide, current_slide, next_slide)
+        if response: lect_script.append(response)
+        else: return False
 
     # Initialize Supabase
     supabase_url = os.environ.get("SUPABASE_URL")
