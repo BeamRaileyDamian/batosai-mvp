@@ -18,26 +18,18 @@ def text_to_speech(text, lang="en"):
     
     # Load the audio into pydub
     audio = AudioSegment.from_file(fp, format="mp3")
+    audio = effects.speedup(audio, playback_speed=1.2)
     
-    # Speed up the audio
-    audio = effects.speedup(audio, playback_speed=1.5)
-
-    # Get the sped-up audio duration
-    duration = audio.duration_seconds
-
-    # Recreate the audio file after speed adjustment
+    # Save to a byte stream in mp3 format
     audio_fp = io.BytesIO()
     audio.export(audio_fp, format="mp3")
     audio_fp.seek(0)
-
-    # Encode the sped-up audio as base64
-    audio_base64 = base64.b64encode(audio_fp.read()).decode("utf-8")
     
-    return audio_base64, duration
+    return audio_fp, audio.duration_seconds
 
 if "curr_lect" in st.session_state: setup(st.session_state.curr_lect)
 screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
-url = st.session_state.lect_script["pdf_url"]
+if "lect_script" in st.session_state: url = st.session_state.lect_script["pdf_url"]
 response = requests.get(url)
 
 if "curr_slide" not in st.session_state: st.session_state.curr_slide = 1
@@ -52,17 +44,17 @@ if screen_width:
                     render_text=True)
             
         try:
-            audio_base64, duration = text_to_speech(st.session_state.lect_script["script"][slide-1], "en")
+            # Get the audio and its duration
+            audio_fp, audio_duration = text_to_speech(st.session_state.lect_script["script"][slide-1], "en")
             
-            audio_html = f'''
-                <audio autoplay>
-                    <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
-                    Your browser does not support the audio element.
-                </audio>
-            '''
+            # Encode the audio as base64
+            audio_base64 = base64.b64encode(audio_fp.read()).decode('utf-8')
+            audio_url = f"data:audio/mp3;base64,{audio_base64}"
             
-            st.markdown(audio_html, unsafe_allow_html=True)
-            sleep(duration)
-            
+            # Use markdown to hide audio player UI, just play audio
+            st.markdown(f'<audio autoplay="true" src="{audio_url}" style="display:none;"></audio>', unsafe_allow_html=True)
+
+            sleep(audio_duration)
+
         except Exception as e:
             st.error(f'Error converting text to speech: {e}')

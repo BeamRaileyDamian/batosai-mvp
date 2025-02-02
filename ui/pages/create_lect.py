@@ -14,8 +14,11 @@ uploaded_file = st.file_uploader("PDF Presentation", type="pdf")
 if uploaded_file:
     st.session_state.lecture_title = uploaded_file.name[:-4].replace("_", " ")
 
+additional_files = st.file_uploader("Additional Files (Used as Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
+if additional_files:
+    pass
+
 lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
-# st.session_state.lecture_title = lect_title
 
 if st.button("Create"):
     if lect_title in st.session_state.lect_ids:

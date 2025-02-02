@@ -15,4 +15,5 @@ db = firestore.client()
 if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
 
 if st.button("Create a Lecture"): st.switch_page("pages/create_lect.py")
+if st.button("Update a Lecture"): pass # st.switch_page("pages/edit_lect.py")
 if st.button("Delete a Lecture"): st.switch_page("pages/delete_lect.py")
