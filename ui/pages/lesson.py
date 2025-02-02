@@ -20,7 +20,7 @@ def text_to_speech(text, lang="en"):
     audio = AudioSegment.from_file(fp, format="mp3")
     
     # Speed up the audio
-    audio = effects.speedup(audio, playback_speed=1.5)
+    audio = effects.speedup(audio, playback_speed=1.1)
 
     # Get the sped-up audio duration
     duration = audio.duration_seconds
