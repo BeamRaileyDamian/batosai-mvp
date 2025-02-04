@@ -3,5 +3,6 @@ venv
 config.yaml
 firebase_config.json
 data
+raw_data
 __pycache__
 experiments/
