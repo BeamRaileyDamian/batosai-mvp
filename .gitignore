@@ -1,5 +1,7 @@
 venv
 .env
+config.yaml
 firebase_config.json
 data
 __pycache__
+experiments/
