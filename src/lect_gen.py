@@ -129,7 +129,9 @@ def lect_gen(file, filename, lect_title):
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
 
         response = script_gen(llm, prev_slide, current_slide, next_slide)
-        if response: lect_script.append(response)
+        if response: 
+            lect_script.append(response)
+            break ######################
         else: return False
 
     # Initialize Supabase

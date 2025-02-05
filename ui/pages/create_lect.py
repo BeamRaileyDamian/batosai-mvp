@@ -26,19 +26,21 @@ if st.button("Create"):
         filename = uploaded_file.name
         file = uploaded_file.read()
 
-        # response = lect_gen(file, filename, lect_title)
-        # if response: 
-        #     if "lect_ids" in st.session_state:
-        #         st.session_state.lect_ids.append(lect_title)
-        #         st.session_state.lect_ids.sort()
-        #     st.success("Lecture Successully Created")
-        # else: st.error("Lecture Creation Failed")
+        response = lect_gen(file, filename, lect_title)
+        if response: 
+            if "lect_ids" in st.session_state:
+                st.session_state.lect_ids.append(lect_title)
+                st.session_state.lect_ids.sort()
+            st.success("Lecture Successully Created")
+        else: st.error("Lecture Creation Failed")
 
         rag_pdfs = [file]
+        rag_pdfs_filenames = [filename]
         if additional_files:
             for f in additional_files:
                 rag_pdfs.append(f.read())
-        create_embeddings(rag_pdfs, st.session_state.lecture_title)
+                rag_pdfs_filenames.append(f.name)
+        create_embeddings(rag_pdfs, st.session_state.lecture_title, rag_pdfs_filenames)
 
     elif not uploaded_file:
         st.error("PDF Presentation is Required")

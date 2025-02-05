@@ -16,7 +16,14 @@ def main():
         cred = credentials.Certificate("firebase_config.json")
         firebase_admin.initialize_app(cred)
     db = firestore.client()
-    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+    if 'lect_ids' not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+    
+    if not st.session_state.lect_ids:
+        st.warning("No modules available. Ask admin to create modules to proceed.")
+        st.stop()
+
+    if st.session_state.lect_ids and 'retriever' not in st.session_state or 'groq_api_key' not in st.session_state:
+        st.session_state.retriever, st.session_state.groq_api_key = retriever_setup(st.session_state.lect_ids[0])
 
     col1, col2 = st.columns([3, 1])  # Adjust the widths of columns
 
@@ -26,11 +33,9 @@ def main():
     with col2: 
         option = st.selectbox(
         'Chatbot Scope',
-            ["General"] + st.session_state.lect_ids
+            st.session_state.lect_ids
+            # ["General"] + st.session_state.lect_ids
         )
-
-    if 'retriever' not in st.session_state or 'groq_api_key' not in st.session_state:
-        st.session_state.retriever, st.session_state.groq_api_key = retriever_setup()
 
     # Initialize chat history
     if "messages" not in st.session_state:
