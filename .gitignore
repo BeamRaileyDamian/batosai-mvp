@@ -4,5 +4,6 @@ config.yaml
 firebase_config.json
 data
 raw_data
+chroma
 __pycache__
 experiments/

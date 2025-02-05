@@ -1,10 +1,14 @@
 import os
+import sys
 import pymupdf
 import firebase_admin
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from supabase import create_client, Client
 from firebase_admin import credentials, firestore
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from config import *
 
 def pre_template(curr):
     return f"""
@@ -13,7 +17,23 @@ def pre_template(curr):
 
 def post_template(content):
     return f"""
+        Context:
+        - You are given an AI-generated script that would be used for text-to-speech
+        - Clean it by removing AI-generated leading or introductory phrases such as 'Here is the generated script'
+        - Remove also the symbols and special characters that text-to-speech software would speak out loud
 
+        Input to clean:
+        - {content} 
+    """
+
+def first_slide(text):
+    return f"""
+        Context:
+        - You are a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
+        - This slide is the title or the first slide, so you only need to introduce it really shallowly.
+
+        Title Slide:
+        - {text}
     """
 
 def main_template(prev, curr, next):
@@ -22,6 +42,7 @@ def main_template(prev, curr, next):
         - You are a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
         - The script should be at most 120 words.
+        - In generating the script, you could read some of the points in the slide like a lecturer does.
 
         Slide Content:
         - Current Slide: {curr}
@@ -44,7 +65,7 @@ def main_template(prev, curr, next):
 def create_model(groq_api_key):
     return ChatGroq(
         groq_api_key=groq_api_key,
-        model_name='llama-3.3-70b-versatile',     
+        model_name=LLM_MODEL,     
         temperature=0
     )
 
@@ -67,15 +88,27 @@ def script_gen(llm, prev_slide, current_slide, next_slide):
     
 
     # main
-    message = main_template(prev_slide, current_slide, next_slide)
+    message = None
+    raw_response = None
+    if prev_slide == "None":
+        message = first_slide(current_slide)
+    else: 
+        message = main_template(prev_slide, current_slide, next_slide)
+
     try: 
-        response = llm.invoke(message).content
-        return response
+        raw_response = llm.invoke(message).content
     except Exception as e:
         print(e)
         return False
     
     # postprocessing
+    try: 
+        post_message = post_template(raw_response)
+        response = llm.invoke(post_message).content
+        return response
+    except Exception as e:
+        print(e)
+        return False
 
 
 def lect_gen(file, filename, lect_title):

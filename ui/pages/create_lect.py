@@ -5,6 +5,7 @@ from utils import *
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.lect_gen import lect_gen
+from src.embedder import create_embeddings
 
 setup("Create a Lecture")
 st.title("Create a Lecture")
@@ -15,8 +16,6 @@ if uploaded_file:
     st.session_state.lecture_title = uploaded_file.name[:-4].replace("_", " ")
 
 additional_files = st.file_uploader("Additional Files (Used as Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
-if additional_files:
-    pass
 
 lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
 
@@ -27,13 +26,20 @@ if st.button("Create"):
         filename = uploaded_file.name
         file = uploaded_file.read()
 
-        response = lect_gen(file, filename, lect_title)
-        if response: 
-            if "lect_ids" in st.session_state:
-                st.session_state.lect_ids.append(lect_title)
-                st.session_state.lect_ids.sort()
-            st.success("Lecture Successully Created")
-        else: st.error("Lecture Creation Failed")
+        # response = lect_gen(file, filename, lect_title)
+        # if response: 
+        #     if "lect_ids" in st.session_state:
+        #         st.session_state.lect_ids.append(lect_title)
+        #         st.session_state.lect_ids.sort()
+        #     st.success("Lecture Successully Created")
+        # else: st.error("Lecture Creation Failed")
+
+        rag_pdfs = [file]
+        if additional_files:
+            for f in additional_files:
+                rag_pdfs.append(f.read())
+        create_embeddings(rag_pdfs, st.session_state.lecture_title)
+
     elif not uploaded_file:
         st.error("PDF Presentation is Required")
     elif not lect_title:

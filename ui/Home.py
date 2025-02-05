@@ -1,3 +1,4 @@
+import torch
 from utils import *
 import firebase_admin
 import streamlit as st
@@ -5,6 +6,7 @@ from firebase_admin import credentials, firestore
 
 setup("bat.OS.AI")
 st.title("Welcome to bat.OS.AI! :robot_face:")
+torch.classes.__path__ = []
 
 # Initialize Firebase
 if not firebase_admin._apps:  # Ensure Firebase isn't initialized multiple times

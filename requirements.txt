@@ -4,8 +4,12 @@ pymupdf
 supabase
 streamlit
 python-dotenv
-langchain_groq
 firebase_admin
+langchain_groq
+chromadb==0.5.3
+langchain_chroma
 streamlit_js_eval
+langchain_community
 streamlit-pdf-viewer
+langchain_huggingface
 streamlit-authenticator

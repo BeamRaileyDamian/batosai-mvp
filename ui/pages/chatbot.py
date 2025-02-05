@@ -1,8 +1,13 @@
+import os
+import sys
 import time
 from utils import *
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
+from retriever import rag_pipeline, retriever_setup
 
 def main():
     setup("Chatbot")
@@ -24,8 +29,8 @@ def main():
             ["General"] + st.session_state.lect_ids
         )
 
-    # if 'retriever' not in st.session_state or 'groq_api_key' not in st.session_state:
-    #     st.session_state.retriever, st.session_state.groq_api_key = setup()
+    if 'retriever' not in st.session_state or 'groq_api_key' not in st.session_state:
+        st.session_state.retriever, st.session_state.groq_api_key = retriever_setup()
 
     # Initialize chat history
     if "messages" not in st.session_state:
@@ -44,8 +49,7 @@ def main():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        #response = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key)
-        response = "Hello World"
+        response = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key)
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
