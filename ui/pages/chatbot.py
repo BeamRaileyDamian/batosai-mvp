@@ -48,6 +48,9 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
     # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -61,7 +64,7 @@ def main():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        response = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key)
+        response, st.session_state.chat_history = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key, st.session_state.chat_history)
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
