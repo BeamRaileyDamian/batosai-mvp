@@ -1,8 +1,8 @@
 import os
 import sys
+import requests
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -16,11 +16,27 @@ from embedder import get_embedding_function
 def create_retriever(collection_name):
     vectorstore = Chroma(persist_directory=f'{CHROMA_PATH}/{collection_name}', 
                         embedding_function=get_embedding_function())
-    return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
+    return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
 
 def retriever_setup(collection_name):
     load_dotenv()
     return create_retriever(collection_name), os.environ.get('GROQ_API_KEY')
+
+def rerank(documents, query):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {os.environ.get('JINA_API_KEY')}"
+    }
+
+    data = {
+        "model": RERANKING_MODEL,
+        "query": query,
+        "top_n": 5,
+        "documents": documents
+    }
+
+    response = requests.post(JINA_URL, headers=headers, json=data)
+    return response.json()["results"]
 
 def create_template():
     PROMPT_TEMPLATE = """
@@ -39,12 +55,14 @@ def create_template():
     ])
 
 def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
+    return "\n\n".join(doc["document"]["text"] for doc in docs)
 
 def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
     # Retrieve relevant context
     context = retriever.invoke(query_text)
-    formatted_context = format_docs(context)
+    # rerank and filter
+    filtered_docs = rerank([doc.page_content for doc in context], query_text)
+    formatted_context = format_docs(filtered_docs)
     
     # Create processing chain
     chain = (
