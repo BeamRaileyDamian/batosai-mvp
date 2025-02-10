@@ -78,8 +78,26 @@ def unable_to_answer(query, llm):
     response = llm.invoke(prompt)
     return response.content
 
-def post_clean(query):
-    pass
+def post_clean(query, llm):
+    prompt = f"""
+    You are an AI assistant refining a response to remove any mention of external knowledge sources.  
+    Revise the response to sound natural, as if the AI knew the answer without retrieving documents.  
+    Remove or rewrite phrases such as:
+    - "Based on the provided context"
+    - "According to the retrieved documents"
+    - "From my available sources"
+    - "I found in the documents"
+    - "From external sources"
+    - "The data indicates"
+
+    **Original Response:**  
+    {query}
+
+    **Cleaned Response:**  
+    """
+
+    response = llm.invoke(prompt)
+    return response.content
 
 def format_docs(docs):
     return "\n\n".join(doc["document"]["text"] for doc in docs)
@@ -106,6 +124,7 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
         | create_template()
         | llm
         | StrOutputParser()
+        | (lambda response: post_clean(response, llm))
     )
     
     # Invoke chain with chat history
