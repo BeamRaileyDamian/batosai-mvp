@@ -54,6 +54,33 @@ def create_template():
         ("human", "{question}"),
     ])
 
+def is_relevant(query, llm):
+    prompt = f"""
+    You are an intelligent tutor for a course on Operating Systems.
+    Your task is to determine whether the given question is relevant to the subject and if it is academic in nature and not asking for the answer to an exam or quiz question.
+
+    Question: "{query}"
+
+    Answer only with "yes" if it is relevant and "no" if it is not.
+    """
+
+    response = llm.invoke(prompt)
+    return "yes" in response.content.lower()
+
+def unable_to_answer(query, llm):
+    prompt = f"""
+    You are an intelligent tutor for a course on Operating Systems.
+    Say that you are unable to answer the following question due to your scope and ethics, if it applies.
+
+    Question: "{query}"
+    """
+
+    response = llm.invoke(prompt)
+    return response.content
+
+def post_clean(query):
+    pass
+
 def format_docs(docs):
     return "\n\n".join(doc["document"]["text"] for doc in docs)
 
@@ -63,12 +90,21 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
     # rerank and filter
     filtered_docs = rerank([doc.page_content for doc in context], query_text)
     formatted_context = format_docs(filtered_docs)
-    
-    # Create processing chain
+
+    llm = create_model(groq_api_key)
+
+    if not is_relevant(query_text, llm):
+        response = unable_to_answer(query_text, llm)
+        updated_history = chat_history + [
+            HumanMessage(content=query_text),
+            AIMessage(content=response)
+        ]
+        return response, updated_history
+
     chain = (
         RunnablePassthrough.assign(context=lambda _: formatted_context)
         | create_template()
-        | create_model(groq_api_key)
+        | llm
         | StrOutputParser()
     )
     
