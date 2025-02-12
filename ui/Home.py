@@ -2,11 +2,15 @@ import torch
 from utils import *
 import firebase_admin
 import streamlit as st
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
+
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+torch.classes.__path__ = []
 
 setup("bat.OS.AI")
 st.title("Welcome to bat.OS.AI! :robot_face:")
-torch.classes.__path__ = []
 
 if not firebase_admin._apps:
     init_firebase()

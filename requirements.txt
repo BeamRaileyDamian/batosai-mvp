@@ -7,6 +7,7 @@ firebase_admin
 langchain_groq
 chromadb==0.5.3
 langchain_chroma
+pysqlite3-binary
 streamlit_js_eval
 langchain_community
 streamlit-pdf-viewer
