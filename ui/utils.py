@@ -20,5 +20,4 @@ def get_all_document_ids(db, collection_name):
 @st.cache_resource
 def init_firebase():
     cred = credentials.Certificate(dict(st.secrets["firebase"]["proj_settings"]))
-    print(cred)
     return firebase_admin.initialize_app(cred)

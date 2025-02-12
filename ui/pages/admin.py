@@ -15,7 +15,7 @@ with open('config.yaml') as file:
 if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
     st.session_state.admin_title = "Admin Panel"
 elif st.session_state["authentication_status"] and st.session_state["name"]:
-    st.session_state.admin_title = f'Welcome, {config['credentials']['usernames'][st.session_state["username"]]['first_name']}'
+    st.session_state.admin_title = f'Welcome, {config['credentials']['usernames'][st.session_state["username"]]["name"]}'
 
 st.title(st.session_state.admin_title)
 
@@ -37,15 +37,6 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-# try:
-#     authenticator.experimental_guest_login('Login with Google',
-#                                            provider='google',
-#                                            oauth2=config['oauth2'])
-#     with open('config.yaml', 'w') as file:
-#         yaml.dump(config, file, default_flow_style=False)
-# except Exception as e:
-#     st.error(e)
-
 if st.session_state['authentication_status']:
         if not firebase_admin._apps:
             init_firebase()
@@ -65,5 +56,4 @@ if st.session_state['authentication_status']:
 elif st.session_state['authentication_status'] is False:
     st.error('Username/password is incorrect')
 elif st.session_state['authentication_status'] is None:
-    # st.warning('Please Enter Credentials or Login with Google')
     st.warning('Please Enter Credentials')
