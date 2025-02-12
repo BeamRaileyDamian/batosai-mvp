@@ -19,10 +19,8 @@ def delete(collection_name, document_id):
         print(f"An error occurred: {e}")
         return False
 
-# Initialize Firebase
-if not firebase_admin._apps:  # Ensure Firebase isn't initialized multiple times
-    cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    init_firebase()
 db = firestore.client()
 
 setup("Delete a Lecture")

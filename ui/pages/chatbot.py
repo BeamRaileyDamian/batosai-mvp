@@ -17,9 +17,9 @@ def main():
     setup("Chatbot")
 
     if not firebase_admin._apps:
-        cred = credentials.Certificate("firebase_config.json")
-        firebase_admin.initialize_app(cred)
+        init_firebase()
     db = firestore.client()
+
     if 'lect_ids' not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
     
     if not st.session_state.lect_ids:

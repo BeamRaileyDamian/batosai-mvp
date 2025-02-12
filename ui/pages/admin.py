@@ -48,8 +48,7 @@ except Exception as e:
 
 if st.session_state['authentication_status']:
         if not firebase_admin._apps:
-            cred = credentials.Certificate("firebase_config.json")
-            firebase_admin.initialize_app(cred)
+            init_firebase()
         db = firestore.client()
 
         if "lect_ids" not in st.session_state:

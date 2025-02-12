@@ -8,11 +8,10 @@ setup("bat.OS.AI")
 st.title("Welcome to bat.OS.AI! :robot_face:")
 torch.classes.__path__ = []
 
-# Initialize Firebase
-if not firebase_admin._apps:  # Ensure Firebase isn't initialized multiple times
-    cred = credentials.Certificate("firebase_config.json")
-    firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    init_firebase()
 db = firestore.client()
+
 if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
 
 st.markdown(

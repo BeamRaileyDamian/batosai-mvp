@@ -1,4 +1,6 @@
 import streamlit as st
+import firebase_admin
+from firebase_admin import credentials
 
 def setup(tabname):
     st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname)
@@ -14,3 +16,8 @@ def get_all_document_ids(db, collection_name):
         return [doc.id for doc in docs]
     except Exception as e:
         return f"Error retrieving document IDs: {str(e)}"
+    
+@st.cache_resource
+def init_firebase():
+    cred = credentials.Certificate("firebase_config.json")
+    return firebase_admin.initialize_app(cred)
