@@ -4,7 +4,7 @@ import firebase_admin
 import streamlit as st
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
 setup("Admin Panel")
 
@@ -37,14 +37,14 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-try:
-    authenticator.experimental_guest_login('Login with Google',
-                                           provider='google',
-                                           oauth2=config['oauth2'])
-    with open('config.yaml', 'w') as file:
-        yaml.dump(config, file, default_flow_style=False)
-except Exception as e:
-    st.error(e)
+# try:
+#     authenticator.experimental_guest_login('Login with Google',
+#                                            provider='google',
+#                                            oauth2=config['oauth2'])
+#     with open('config.yaml', 'w') as file:
+#         yaml.dump(config, file, default_flow_style=False)
+# except Exception as e:
+#     st.error(e)
 
 if st.session_state['authentication_status']:
         if not firebase_admin._apps:
@@ -65,4 +65,5 @@ if st.session_state['authentication_status']:
 elif st.session_state['authentication_status'] is False:
     st.error('Username/password is incorrect')
 elif st.session_state['authentication_status'] is None:
-    st.warning('Please Enter Credentials or Login with Google')
+    # st.warning('Please Enter Credentials or Login with Google')
+    st.warning('Please Enter Credentials')
