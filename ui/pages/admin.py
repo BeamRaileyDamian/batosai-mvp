@@ -8,9 +8,19 @@ from firebase_admin import firestore
 
 setup("Admin Panel")
 
-config = None
-with open('config.yaml') as file:
-    config = yaml.load(file, Loader=SafeLoader)
+config = {
+    "credentials": st.secrets["credentials"].to_dict(),
+    "cookie": st.secrets["cookie"],
+    "preauthorized": st.secrets["preauthorized"]
+}
+
+authenticator = stauth.Authenticate(
+    config["credentials"],
+    config["cookie"]["name"],
+    config["cookie"]["key"],
+    config["cookie"]["expiry_days"],
+    config["preauthorized"]
+)
 
 if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
     st.session_state.admin_title = "Admin Panel"
@@ -19,18 +29,9 @@ elif st.session_state["authentication_status"] and st.session_state["name"]:
 
 st.title(st.session_state.admin_title)
 
-# Ensure passwords are pre-hashed
 try:
     stauth.Hasher.hash_passwords(config['credentials'])
 except: pass
-
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    auto_hash=False
-)
 
 try:
     authenticator.login()
