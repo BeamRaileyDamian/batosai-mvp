@@ -2,7 +2,7 @@ import os
 import sys
 import pymupdf
 import firebase_admin
-from dotenv import load_dotenv
+import streamlit as st
 from langchain_groq import ChatGroq
 from supabase import create_client, Client
 from firebase_admin import credentials, firestore
@@ -112,11 +112,10 @@ def script_gen(llm, prev_slide, current_slide, next_slide):
 
 
 def lect_gen(file, filename, lect_title):
-    load_dotenv()
     lect_script = []
 
     # Load the LLM
-    groq_api_key = os.environ.get('GROQ_API_KEY')
+    groq_api_key = st.secrets['GROQ_API_KEY']
     llm = create_model(groq_api_key)
     
     # Open the PDF file and generate the lecture scripts
@@ -135,10 +134,10 @@ def lect_gen(file, filename, lect_title):
         else: return False
 
     # Initialize Supabase
-    supabase_url = os.environ.get("SUPABASE_URL")
-    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
-    bucket_name = os.environ.get("BUCKET_NAME")
-    bucket_folder = os.environ.get("BUCKET_FOLDER")
+    supabase_url = st.secrets["SUPABASE_URL"]
+    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
+    bucket_name = st.secrets["BUCKET_NAME"]
+    bucket_folder = st.secrets["BUCKET_FOLDER"]
 
     # Upload PDF file
     bucket_storage_path = f"{bucket_folder}/{filename}"

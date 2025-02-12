@@ -3,7 +3,6 @@ pydub
 pymupdf
 supabase
 streamlit
-python-dotenv
 firebase_admin
 langchain_groq
 chromadb==0.5.3

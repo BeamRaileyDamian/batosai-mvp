@@ -1,8 +1,8 @@
 import os
 import sys
 import requests
-from dotenv import load_dotenv
 from langchain_chroma import Chroma
+import streamlit as st
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -19,13 +19,12 @@ def create_retriever(collection_name):
     return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
 
 def retriever_setup(collection_name):
-    load_dotenv()
-    return create_retriever(collection_name), os.environ.get('GROQ_API_KEY')
+    return create_retriever(collection_name), st.secrets['GROQ_API_KEY']
 
 def rerank(documents, query):
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.environ.get('JINA_API_KEY')}"
+        "Authorization": f"Bearer {st.secrets['JINA_API_KEY']}"
     }
 
     data = {

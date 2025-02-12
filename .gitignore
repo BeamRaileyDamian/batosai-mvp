@@ -1,6 +1,7 @@
 venv
 .env
 config.yaml
+.streamlit/secrets.toml
 firebase_config.json
 data
 raw_data
