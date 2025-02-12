@@ -146,7 +146,7 @@ def lect_gen(file, filename, lect_title):
 
     # Initialize Firebase Firestore
     if not firebase_admin._apps:
-        cred = credentials.Certificate("firebase_config.json")
+        cred = st.secrets["firebase"]["proj_settings"]
         firebase_admin.initialize_app(cred)
     db = firestore.client()
 
