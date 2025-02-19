@@ -1,11 +1,15 @@
 import os
+import io
+import uuid
 import sys
 import pymupdf
 import firebase_admin
+from gtts import gTTS
 import streamlit as st
 from langchain_groq import ChatGroq
+from firebase_admin import firestore
+from pydub import AudioSegment, effects
 from supabase import create_client, Client
-from firebase_admin import credentials, firestore
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
@@ -69,7 +73,7 @@ def create_model(groq_api_key):
         temperature=0
     )
 
-def upload_pdf(file, storage_path, supabase_url, supabase_api_key, bucket_name):
+def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name):
     supabase: Client = create_client(supabase_url, supabase_api_key)
     try:
         supabase.storage.from_(bucket_name).upload(storage_path, file)
@@ -110,31 +114,21 @@ def script_gen(llm, prev_slide, current_slide, next_slide):
         print(e)
         return False
 
-def text_to_speech(text, lang="en"):
+def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
     # Generate TTS audio
     tts = gTTS(text=text, lang=lang)
     fp = io.BytesIO()
     tts.write_to_fp(fp)
     fp.seek(0)
     
-    # Load the audio into pydub
     audio = AudioSegment.from_file(fp, format="mp3")
-    
-    # Speed up the audio
     audio = effects.speedup(audio, playback_speed=1.1)
-
-    # Get the sped-up audio duration
     duration = audio.duration_seconds
+    filename = f"{uuid.uuid4()}.mp3"
+    file_bytes = audio.export(format="mp3").read()
 
-    # Recreate the audio file after speed adjustment
-    audio_fp = io.BytesIO()
-    audio.export(audio_fp, format="mp3")
-    audio_fp.seek(0)
-
-    # Encode the sped-up audio as base64
-    audio_base64 = base64.b64encode(audio_fp.read()).decode("utf-8")
-    
-    return audio_base64, duration
+    public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name)
+    return public_url, duration
 
 def lect_gen(file, filename, lect_title):
     lect_script = []
@@ -142,6 +136,13 @@ def lect_gen(file, filename, lect_title):
     # Load the LLM
     groq_api_key = st.secrets['GROQ_API_KEY']
     llm = create_model(groq_api_key)
+
+    # Initialize Supabase
+    supabase_url = st.secrets["SUPABASE_URL"]
+    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
+    bucket_name = st.secrets["BUCKET_NAME"]
+    bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
+    bucket_folder_audio = st.secrets["BUCKET_FOLDER_AUDIO"]
     
     # Open the PDF file and generate the lecture scripts
     doc = pymupdf.open(stream=file)
@@ -152,21 +153,22 @@ def lect_gen(file, filename, lect_title):
         if i > 0: prev_slide = lect_script[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
 
-        response = script_gen(llm, prev_slide, current_slide, next_slide)
-        if response: 
-            lect_script.append(response)
-            break ######################
-        else: return False
+        script = script_gen(llm, prev_slide, current_slide, next_slide)
+        if not script: return False
 
-    # Initialize Supabase
-    supabase_url = st.secrets["SUPABASE_URL"]
-    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
-    bucket_name = st.secrets["BUCKET_NAME"]
-    bucket_folder = st.secrets["BUCKET_FOLDER"]
+        public_url_audio, duration = tts_and_upload(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        if not public_url_audio: return False
+
+        lect_script.append({
+            "script": script,
+            "audio": public_url_audio,
+            "duration": duration
+        })
+        break ######################
 
     # Upload PDF file
-    bucket_storage_path = f"{bucket_folder}/{filename}"
-    publicUrl = upload_pdf(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
+    bucket_storage_path = f"{bucket_folder_pdf}/{filename}"
+    publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
     if not publicUrl: return False
 
     # Initialize Firebase Firestore
