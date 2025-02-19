@@ -15,6 +15,7 @@ def create_embeddings(pdfs_stream, collection_name, pdf_filenames):
     documents = load_documents(pdfs_stream, pdf_filenames)
     chunks = split_documents(documents)
     add_to_chroma(chunks, collection_name)
+    return True
 
 def get_embedding_function():
     return HuggingFaceEmbeddings(model_name=MODEL_NAME, model_kwargs={"device": "cpu"})

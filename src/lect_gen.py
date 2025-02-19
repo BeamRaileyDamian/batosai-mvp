@@ -110,6 +110,31 @@ def script_gen(llm, prev_slide, current_slide, next_slide):
         print(e)
         return False
 
+def text_to_speech(text, lang="en"):
+    # Generate TTS audio
+    tts = gTTS(text=text, lang=lang)
+    fp = io.BytesIO()
+    tts.write_to_fp(fp)
+    fp.seek(0)
+    
+    # Load the audio into pydub
+    audio = AudioSegment.from_file(fp, format="mp3")
+    
+    # Speed up the audio
+    audio = effects.speedup(audio, playback_speed=1.1)
+
+    # Get the sped-up audio duration
+    duration = audio.duration_seconds
+
+    # Recreate the audio file after speed adjustment
+    audio_fp = io.BytesIO()
+    audio.export(audio_fp, format="mp3")
+    audio_fp.seek(0)
+
+    # Encode the sped-up audio as base64
+    audio_base64 = base64.b64encode(audio_fp.read()).decode("utf-8")
+    
+    return audio_base64, duration
 
 def lect_gen(file, filename, lect_title):
     lect_script = []

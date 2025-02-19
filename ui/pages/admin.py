@@ -1,10 +1,8 @@
-import yaml
 from utils import *
 import firebase_admin
 import streamlit as st
-from yaml.loader import SafeLoader
-import streamlit_authenticator as stauth
 from firebase_admin import firestore
+import streamlit_authenticator as stauth
 
 setup("Admin Panel")
 
