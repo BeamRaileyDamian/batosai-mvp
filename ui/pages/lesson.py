@@ -1,39 +1,9 @@
-import io
-import base64
 import requests
 from utils import *
-from gtts import gTTS
 import streamlit as st
 from time import sleep
 import streamlit_js_eval
-from pydub import AudioSegment, effects
 from streamlit_pdf_viewer import pdf_viewer
-
-def text_to_speech(text, lang="en"):
-    # Generate TTS audio
-    tts = gTTS(text=text, lang=lang)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
-    
-    # Load the audio into pydub
-    audio = AudioSegment.from_file(fp, format="mp3")
-    
-    # Speed up the audio
-    audio = effects.speedup(audio, playback_speed=1.1)
-
-    # Get the sped-up audio duration
-    duration = audio.duration_seconds
-
-    # Recreate the audio file after speed adjustment
-    audio_fp = io.BytesIO()
-    audio.export(audio_fp, format="mp3")
-    audio_fp.seek(0)
-
-    # Encode the sped-up audio as base64
-    audio_base64 = base64.b64encode(audio_fp.read()).decode("utf-8")
-    
-    return audio_base64, duration
 
 if "curr_lect" in st.session_state: setup(st.session_state.curr_lect)
 screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
@@ -52,17 +22,18 @@ if screen_width:
                     render_text=True)
             
         try:
-            audio_base64, duration = text_to_speech(st.session_state.lect_script["script"][slide-1], "en")
+            mp3_url = st.session_state.lect_script["script"][slide-1]["audio"]
+            duration = st.session_state.lect_script["script"][slide-1]["duration"]
             
             audio_html = f'''
                 <audio autoplay>
-                    <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+                    <source src="{mp3_url}" type="audio/mp3">
                     Your browser does not support the audio element.
                 </audio>
             '''
             
             st.markdown(audio_html, unsafe_allow_html=True)
-            sleep(duration)
+            sleep(duration + 2)
             
         except Exception as e:
-            st.error(f'Error converting text to speech: {e}')
+            st.error(f'Error playing: {e}')

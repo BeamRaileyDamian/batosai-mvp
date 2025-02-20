@@ -5,6 +5,7 @@ import sys
 import pymupdf
 import firebase_admin
 from gtts import gTTS
+from math import ceil
 import streamlit as st
 from langchain_groq import ChatGroq
 from firebase_admin import firestore
@@ -123,7 +124,7 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
     
     audio = AudioSegment.from_file(fp, format="mp3")
     audio = effects.speedup(audio, playback_speed=1.1)
-    duration = audio.duration_seconds
+    duration = ceil(audio.duration_seconds)
     filename = f"{uuid.uuid4()}.mp3"
     file_bytes = audio.export(format="mp3").read()
 
@@ -164,7 +165,7 @@ def lect_gen(file, filename, lect_title):
             "audio": public_url_audio,
             "duration": duration
         })
-        break ######################
+        #break ######################
 
     # Upload PDF file
     bucket_storage_path = f"{bucket_folder_pdf}/{filename}"
