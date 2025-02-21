@@ -1,9 +1,9 @@
-import sys
 import os
+import shutil
 from utils import *
 import firebase_admin
 import streamlit as st
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
 def delete(collection_name, document_id):
     try:

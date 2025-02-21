@@ -44,10 +44,10 @@ def first_slide(text):
 def main_template(prev, curr, next):
     return f"""
         Context:
-        - You are a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
+        - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
-        - The script should be at most 120 words.
-        - In generating the script, you could read some of the points in the slide like a lecturer does.
+        - The script should be at most 150 words.
+        - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
 
         Slide Content:
         - Current Slide: {curr}
@@ -55,8 +55,8 @@ def main_template(prev, curr, next):
         - Next Slide: {next}
 
         Structure and Emphasis:
-        1. Introduction: Briefly introduce the main idea of the current slide, building naturally on the previous script.
-        2. Key Details: Explain key points clearly and concisely. Maintain the style established in the previous script.
+        1. Introduction: Briefly introduce the main idea of the current slide. 
+        2. Explanation: Explain the slide content clearly.
         3. Transition to Next Slide: Conclude with a statement or question that connects to the next slide's content.
 
         Extra Instructions:

@@ -4,7 +4,7 @@ import time
 from utils import *
 import streamlit as st
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import firestore
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from retriever import rag_pipeline, retriever_setup, create_retriever
