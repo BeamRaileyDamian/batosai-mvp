@@ -74,19 +74,25 @@ def create_model(groq_api_key):
         temperature=0
     )
 
+from supabase import create_client, Client
+
 def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name):
     supabase: Client = create_client(supabase_url, supabase_api_key)
+    
     try:
+        # Attempt to upload file
         supabase.storage.from_(bucket_name).upload(storage_path, file)
-        public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
-        if public_url.endswith("?"): public_url = public_url[:-1]
-        return public_url
     except Exception as e:
-        if e.to_dict()["code"] == "Duplicate":
-            public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
-            if public_url.endswith("?"): public_url = public_url[:-1]
-            return public_url
-        return False
+        error_dict = e.to_dict() if hasattr(e, "to_dict") else {}
+        
+        # If file already exists, delete it first
+        if error_dict.get("code") == "Duplicate":
+            supabase.storage.from_(bucket_name).remove([storage_path])
+            supabase.storage.from_(bucket_name).upload(storage_path, file)
+    
+    # Generate public URL after upload
+    public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
+    return public_url.rstrip("?")
 
 def script_gen(llm, prev_slide, current_slide, next_slide):
     # preprocessing

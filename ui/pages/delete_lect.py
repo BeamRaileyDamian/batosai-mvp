@@ -1,5 +1,3 @@
-import os
-import shutil
 from utils import *
 import firebase_admin
 import streamlit as st
