@@ -124,7 +124,7 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
         | llm
         | StrOutputParser()
         | (lambda response: post_clean(response, llm))
-    )
+    ).with_config({"tracing": True})
     
     # Invoke chain with chat history
     response = chain.invoke({
