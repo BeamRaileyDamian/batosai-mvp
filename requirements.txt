@@ -1,6 +1,7 @@
 gtts
 pydub
 pypdf
+ffmpeg
 pymupdf
 supabase
 streamlit
