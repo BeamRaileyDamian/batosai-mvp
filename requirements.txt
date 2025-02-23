@@ -1,10 +1,10 @@
 gtts
 pydub
 pypdf
-ffmpeg
 pymupdf
 supabase
 streamlit
+ffmpeg-python
 firebase_admin
 langchain_groq
 chromadb==0.5.3
