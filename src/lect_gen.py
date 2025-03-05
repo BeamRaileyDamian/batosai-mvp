@@ -1,12 +1,13 @@
 import os
 import io
-import uuid
 import sys
+import uuid
 import pymupdf
 import firebase_admin
 from gtts import gTTS
 from math import ceil
 import streamlit as st
+from json import loads
 from langchain_groq import ChatGroq
 from firebase_admin import firestore
 from pydub import AudioSegment, effects
@@ -14,11 +15,6 @@ from supabase import create_client, Client
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
-
-def pre_template(curr):
-    return f"""
-
-    """
 
 def post_template(content):
     return f"""
@@ -74,8 +70,6 @@ def create_model(groq_api_key):
         temperature=0
     )
 
-from supabase import create_client, Client
-
 def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name):
     supabase: Client = create_client(supabase_url, supabase_api_key)
     
@@ -95,10 +89,6 @@ def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucke
     return public_url.rstrip("?")
 
 def script_gen(llm, prev_slide, current_slide, next_slide):
-    # preprocessing
-    
-
-    # main
     message = None
     raw_response = None
     if prev_slide == "None":
@@ -137,8 +127,37 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
     public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name)
     return public_url, duration
 
+def quiz_gen(llm, pdf_content_str):
+    prompt = f'''
+    You are a college instructor creating a 5-question quiz on operating systems based on the content of the lecture slides as shown below.
+
+    {pdf_content_str}
+
+    Generate 5 quiz questions that focus on important concepts from the content above. 
+    - Questions should be a mix of identification, problem-solving (one word, number, or short phrase), and true/false.
+    - Difficulty level should be moderate (4 to 7 out of 10).
+    - Provide the output **only** as a valid JSON array in the format:
+
+    [
+        {{"question": "Question text?", "answer": "Answer text"}},
+        {{"question": "Question text?", "answer": "Answer text"}},
+        ...
+    ]
+
+    No additional text or explanations—just the JSON output.
+    '''
+
+    response = None
+    try: 
+        response = llm.invoke(prompt).content
+        return loads(response)
+    except Exception as e:
+        print(e, response)
+        return False
+
 def lect_gen(file, filename, lect_title):
     lect_script = []
+    entire_pdf_content = []
 
     # Load the LLM
     groq_api_key = st.secrets['GROQ_API_KEY']
@@ -157,6 +176,7 @@ def lect_gen(file, filename, lect_title):
         prev_slide = "None"
         next_slide = "None"
         current_slide = doc[i].get_text()
+        entire_pdf_content.append(f"{current_slide}\n----------------")
         if i > 0: prev_slide = lect_script[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
 
@@ -173,10 +193,17 @@ def lect_gen(file, filename, lect_title):
         })
         #break ######################
 
+    # for i in range(len(doc)):
+    #     current_slide = doc[i].get_text()
+    #     entire_pdf_content.append(f"{current_slide}\n----------------")
+
     # Upload PDF file
     bucket_storage_path = f"{bucket_folder_pdf}/{filename}"
     publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
     if not publicUrl: return False
+
+    # generate 5-item quiz
+    quiz = quiz_gen(llm, '\n'.join(entire_pdf_content))
 
     # Initialize Firebase Firestore
     if not firebase_admin._apps:
@@ -190,7 +217,8 @@ def lect_gen(file, filename, lect_title):
         "script": lect_script,
         "pdf": filename,
         "pdf_url": publicUrl,
-        "slides_count": doc.page_count
+        "slides_count": doc.page_count,
+        "quiz": quiz
     }
 
     try:
