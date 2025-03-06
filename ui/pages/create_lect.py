@@ -16,7 +16,7 @@ def main():
     if uploaded_file:
         st.session_state.lecture_title = uploaded_file.name[:-4].replace("_", " ")
 
-    additional_files = st.file_uploader("Additional Files (Used as Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
+    additional_files = st.file_uploader("Additional Files (Used as Extra Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
 
     lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
 

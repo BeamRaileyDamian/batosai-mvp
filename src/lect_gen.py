@@ -129,14 +129,16 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
 
 def quiz_gen(llm, pdf_content_str):
     prompt = f'''
-    You are a college instructor creating a 5-question quiz on operating systems based on the content of the lecture slides as shown below.
+    You are a college instructor creating a 5-question quiz on operating systems based on the provided lecture slides.
 
     {pdf_content_str}
 
-    Generate 5 quiz questions that focus on important concepts from the content above. 
-    - Questions should be a mix of identification, problem-solving (one word, number, or short phrase), and true/false.
-    - Difficulty level should be moderate (4 to 7 out of 10).
-    - Provide the output **only** as a valid JSON array in the format:
+    Generate 5 quiz questions focusing on key concepts from the content above.  
+    - Questions should be a mix of identification, problem-solving (one word, number, or short phrase), and true/false.  
+    - For problem-solving questions, ensure the given values or scenarios differ from those in the slides. Ensure that the new values still result in a correct answer by properly recalculating it.  
+    - The difficulty level should be moderate (4 to 7 out of 10).  
+
+    Provide the output **only** as a valid JSON array in the format:
 
     [
         {{"question": "Question text?", "answer": "Answer text"}},
@@ -144,7 +146,7 @@ def quiz_gen(llm, pdf_content_str):
         ...
     ]
 
-    No additional text or explanations—just the JSON output.
+    Respond with a valid JSON array only, with no additional text, explanations, or formatting.
     '''
 
     response = None
@@ -191,7 +193,7 @@ def lect_gen(file, filename, lect_title):
             "audio": public_url_audio,
             "duration": duration
         })
-        #break ######################
+        break ######################
 
     # for i in range(len(doc)):
     #     current_slide = doc[i].get_text()
