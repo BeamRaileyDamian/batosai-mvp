@@ -193,7 +193,7 @@ def lect_gen(file, filename, lect_title):
             "audio": public_url_audio,
             "duration": duration
         })
-        break ######################
+        #break ######################
 
     # for i in range(len(doc)):
     #     current_slide = doc[i].get_text()
