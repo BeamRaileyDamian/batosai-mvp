@@ -54,7 +54,7 @@ def main():
     # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+            st.markdown(message["content"], unsafe_allow_html=True)
 
     # Accept user input
     if prompt := st.chat_input("What is up?"):
@@ -70,21 +70,39 @@ def main():
         with st.chat_message("assistant"):
             messagePlaceholder = st.empty()
             typedResponse = ""
-            sources_string = "\nSources:\n"
+            
+            sources_html = ""
             if sources:
+                sources_html = "\n\n<b>Sources:</b>\n"
+                # Use a div with consistent left margin for alignment
+                sources_html += "<div style='margin-left:0px;'>\n"
+                
                 for i, source in enumerate(sources):
-                    sources_string += f"{i+1}. {source['original_filename']} | Page {source['page']+1} | Relevance Score: {relevance_scores[i]}%\n"
+                    filename = source['original_filename']
+                    page = source['page'] + 1
+                    relevance = relevance_scores[i]
+                    
+                    # Create a URL for each source
+                    source_url = f"{source['url']}#page={page}"
+                    
+                    # Create a clean line with consistent spacing using spans for alignment
+                    sources_html += f"<div style='margin-bottom:5px;'>\n"
+                    sources_html += f"  <span style='display:inline-block; width:30px;'>{i+1}.</span>"
+                    sources_html += f"  <span style='margin-left:10px;'>{filename} | Page {page} | Relevance Score: {relevance}% | </span>\n"
+                    sources_html += f"  <span><a href='{source_url}' target='_blank' style='color: #FDF6E3; font-weight: bold;'>View</a></span>"
+                    sources_html += f"</div>\n"
+                
+                sources_html += "</div>"
 
             if response:
-                response += "\n" + sources_string
-                for char in response: # added typing effect
+                full_response = response + sources_html
+                for char in full_response:  # added typing effect
                     typedResponse += char
-                    messagePlaceholder.markdown(typedResponse)
-                    time.sleep(0.01)
-            
+                    messagePlaceholder.markdown(typedResponse, unsafe_allow_html=True)
+                    time.sleep(0.001)
 
         # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.session_state.messages.append({"role": "assistant", "content": response + sources_html})
 
 if __name__ == "__main__":
     main()

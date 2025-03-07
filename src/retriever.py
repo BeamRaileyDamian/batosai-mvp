@@ -135,7 +135,7 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
             HumanMessage(content=query_text),
             AIMessage(content=response)
         ]
-        return response, updated_history
+        return response, updated_history, [], []
     
     # Retrieve relevant context
     context = retriever.invoke(query_text)
