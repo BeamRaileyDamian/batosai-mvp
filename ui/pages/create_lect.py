@@ -27,8 +27,8 @@ def main():
             filename = uploaded_file.name
             file = uploaded_file.read()
 
-            response_lect = lect_gen(file, filename, lect_title)
-            if response_lect: 
+            publicUrl = lect_gen(file, filename, lect_title)
+            if publicUrl: 
                 if "lect_ids" in st.session_state:
                     st.session_state.lect_ids.append(lect_title)
                     st.session_state.lect_ids.sort()
@@ -37,14 +37,15 @@ def main():
                 return
 
             rag_pdfs = [file]
+            rag_pdfs_url = [publicUrl]
             rag_pdfs_filenames = [filename]
             if additional_files:
                 for f in additional_files:
                     rag_pdfs.append(f.read())
                     rag_pdfs_filenames.append(f.name)
-            response_rag = create_embeddings(rag_pdfs, st.session_state.lecture_title, rag_pdfs_filenames)
+            response_rag = create_embeddings(rag_pdfs, st.session_state.lecture_title, rag_pdfs_filenames, rag_pdfs_url)
 
-            if response_lect and response_rag:
+            if publicUrl and response_rag:
                 st.success("Lecture Successully Created")
 
         elif not uploaded_file:

@@ -10,9 +10,9 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
 
-def create_embeddings(pdfs_stream, collection_name, pdf_filenames):
+def create_embeddings(pdfs_stream, collection_name, pdf_filenames, pdfs_url):
     # Create (or update) the data store.
-    documents = load_documents(pdfs_stream, pdf_filenames)
+    documents = load_documents(pdfs_stream, pdf_filenames, pdfs_url)
     chunks = split_documents(documents)
     add_to_chroma(chunks, collection_name)
     return True
@@ -20,10 +20,11 @@ def create_embeddings(pdfs_stream, collection_name, pdf_filenames):
 def get_embedding_function():
     return HuggingFaceEmbeddings(model_name=MODEL_NAME, model_kwargs={"device": "cpu"})
 
-def load_documents(pdf_streams: list[bytes], pdf_filenames: list[str]):
+def load_documents(pdf_streams: list[bytes], pdf_filenames: list[str], pdfs_url: list[str]):
     # Create a temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_files = {}
+        temp_urls = {}
 
         # Save each PDF stream to a file in the temp directory
         for i, pdf_bytes in enumerate(pdf_streams):
@@ -31,16 +32,18 @@ def load_documents(pdf_streams: list[bytes], pdf_filenames: list[str]):
             with open(temp_path, "wb") as f:
                 f.write(pdf_bytes)
             temp_files[temp_path] = pdf_filenames[i]  # Store mapping to original filename
+            temp_urls[temp_path] = pdfs_url[i]
 
         # Load all PDFs from the temp directory
         loader = PyPDFDirectoryLoader(temp_dir)
         documents = loader.load()
 
-        # Assign original filenames to metadata
+        # Assign original filenames and URLs to metadata
         for doc in documents:
             temp_path = doc.metadata.get("source")
             if temp_path in temp_files:
                 doc.metadata["original_filename"] = temp_files[temp_path]
+                doc.metadata["url"] = temp_urls[temp_path]
 
     return documents
 

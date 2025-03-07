@@ -64,17 +64,24 @@ def main():
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        response, st.session_state.chat_history = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key, st.session_state.chat_history)
+        response, st.session_state.chat_history, sources, relevance_scores = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key, st.session_state.chat_history)
 
         # Display assistant response in chat message container
         with st.chat_message("assistant"):
             messagePlaceholder = st.empty()
             typedResponse = ""
+            sources_string = "\nSources:\n"
+            if sources:
+                for i, source in enumerate(sources):
+                    sources_string += f"{i+1}. {source['original_filename']} | Page {source['page']+1} | Relevance Score: {relevance_scores[i]}%\n"
+
             if response:
+                response += "\n" + sources_string
                 for char in response: # added typing effect
                     typedResponse += char
                     messagePlaceholder.markdown(typedResponse)
                     time.sleep(0.01)
+            
 
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": response})

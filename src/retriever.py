@@ -26,16 +26,38 @@ def rerank(documents, query):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {st.secrets['JINA_API_KEY']}"
     }
-
+    
+    # Create documents with both content and metadata
+    docs_with_metadata = [
+        {
+            "text": doc.page_content,
+            "metadata": doc.metadata
+        } for doc in documents
+    ]
+    
     data = {
         "model": RERANKING_MODEL,
         "query": query,
         "top_n": 5,
-        "documents": documents
+        "documents": [doc["text"] for doc in docs_with_metadata]
     }
-
+    
     response = requests.post(JINA_URL, headers=headers, json=data)
-    return response.json()["results"]
+    results = response.json()["results"]
+    
+    # Map the reranked results back to the original documents with metadata
+    reranked_docs = []
+    for result in results:
+        idx = result["index"]  # Get the original index
+        reranked_docs.append({
+            "document": {
+                "text": docs_with_metadata[idx]["text"],
+                "metadata": docs_with_metadata[idx]["metadata"]
+            },
+            "relevance_score": result["relevance_score"]
+        })
+    
+    return reranked_docs
 
 def create_template():
     PROMPT_TEMPLATE = """
@@ -99,17 +121,14 @@ def post_clean(query, llm):
     return response.content
 
 def format_docs(docs):
-    return "\n\n".join(doc["document"]["text"] for doc in docs)
+    formatted_texts = []
+    for doc in docs:
+        text = doc["document"]["text"]
+        formatted_texts.append(text)
+    return "\n\n".join(formatted_texts), [doc["document"]["metadata"] for doc in docs]
 
 def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
-    # Retrieve relevant context
-    context = retriever.invoke(query_text)
-    # rerank and filter
-    filtered_docs = rerank([doc.page_content for doc in context], query_text)
-    formatted_context = format_docs(filtered_docs)
-
     llm = create_model(groq_api_key)
-
     if not is_relevant(query_text, llm):
         response = unable_to_answer(query_text, llm)
         updated_history = chat_history + [
@@ -117,6 +136,13 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
             AIMessage(content=response)
         ]
         return response, updated_history
+    
+    # Retrieve relevant context
+    context = retriever.invoke(query_text)
+    # rerank and filter
+    filtered_docs = rerank(context, query_text)
+    relevance_scores = [round(i["relevance_score"] * 100, 2) for i in filtered_docs]
+    formatted_context, sources = format_docs(filtered_docs)
 
     chain = (
         RunnablePassthrough.assign(context=lambda _: formatted_context)
@@ -139,4 +165,4 @@ def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
         AIMessage(content=response)
     ]
     
-    return response, updated_history
+    return response, updated_history, sources, relevance_scores

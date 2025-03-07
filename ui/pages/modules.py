@@ -11,8 +11,8 @@ if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_docum
 if "lect_script" not in st.session_state: st.session_state.lect_script = None
 if "curr_lect" not in st.session_state: st.session_state.curr_lect = None
 
-setup("Modules")
-st.title("CMSC 125 Modules")
+setup("Lessons")
+st.title("CMSC 125 Lessons")
 
 if st.session_state.lect_ids:
     for id in st.session_state.lect_ids:

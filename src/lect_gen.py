@@ -70,21 +70,19 @@ def create_model(groq_api_key):
         temperature=0
     )
 
-def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name):
+def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name, content_type):
     supabase: Client = create_client(supabase_url, supabase_api_key)
     
     try:
-        # Attempt to upload file
-        supabase.storage.from_(bucket_name).upload(storage_path, file)
+        supabase.storage.from_(bucket_name).upload(storage_path, file, {'content-type': content_type, 'upsert': 'true'})
     except Exception as e:
         error_dict = e.to_dict() if hasattr(e, "to_dict") else {}
         
-        # If file already exists, delete it first
-        if error_dict.get("code") == "Duplicate":
-            supabase.storage.from_(bucket_name).remove([storage_path])
-            supabase.storage.from_(bucket_name).upload(storage_path, file)
+        # # If file already exists, delete it first
+        # if error_dict.get("code") == "Duplicate":
+        #     supabase.storage.from_(bucket_name).remove([storage_path])
+        #     supabase.storage.from_(bucket_name).upload(storage_path, file, {'content-type': content_type})
     
-    # Generate public URL after upload
     public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
     return public_url.rstrip("?")
 
@@ -124,7 +122,7 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
     filename = f"{uuid.uuid4()}.mp3"
     file_bytes = audio.export(format="mp3").read()
 
-    public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name)
+    public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
     return public_url, duration
 
 def quiz_gen(llm, pdf_content_str):
@@ -201,7 +199,7 @@ def lect_gen(file, filename, lect_title):
 
     # Upload PDF file
     bucket_storage_path = f"{bucket_folder_pdf}/{filename}"
-    publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name)
+    publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name, "application/pdf")
     if not publicUrl: return False
 
     # generate 5-item quiz
@@ -225,10 +223,10 @@ def lect_gen(file, filename, lect_title):
 
     try:
         db.collection("lect_scripts").document(lect_title).set(lecture)
-        return True
+        return publicUrl
     except Exception as e:
         print(e)
-        return False    
+        return False
 
 if __name__ == "__main__":
     lect_gen()
