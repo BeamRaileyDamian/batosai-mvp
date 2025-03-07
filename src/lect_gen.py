@@ -198,7 +198,7 @@ def lect_gen(file, filename, lect_title):
     #     entire_pdf_content.append(f"{current_slide}\n----------------")
 
     # Upload PDF file
-    bucket_storage_path = f"{bucket_folder_pdf}/{filename}"
+    bucket_storage_path = f"{bucket_folder_pdf}/{lect_title}/{filename}"
     publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name, "application/pdf")
     if not publicUrl: return False
 
