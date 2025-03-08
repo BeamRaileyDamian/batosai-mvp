@@ -4,6 +4,7 @@ from firebase_admin import credentials
 
 def setup(tabname):
     st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname)
+    st.logo("assets/sidebar_logo.png", icon_image="assets/main_logo.png", size="large")
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
     st.sidebar.page_link("pages/modules.py", label="Lessons", icon="🧑‍🏫")
     st.sidebar.page_link("pages/materials.py", label="Materials", icon="📚")
