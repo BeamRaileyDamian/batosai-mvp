@@ -139,6 +139,7 @@ def main():
                 file_name=file["file"],
                 mime="application/pdf",
                 icon=":material/download:",
+                key=folder["folder"]+"_"+file["file"]
             )
         st.divider()
 

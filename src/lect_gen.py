@@ -117,7 +117,7 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
     fp.seek(0)
     
     audio = AudioSegment.from_file(fp, format="mp3")
-    audio = effects.speedup(audio, playback_speed=1.1)
+    audio = effects.speedup(audio, playback_speed=3)
     duration = ceil(audio.duration_seconds)
     filename = f"{uuid.uuid4()}.mp3"
     file_bytes = audio.export(format="mp3").read()
