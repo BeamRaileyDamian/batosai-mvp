@@ -29,12 +29,18 @@ def main():
     st.title("Create a Lecture")
 
     if "lecture_title" not in st.session_state: st.session_state.lecture_title = ""
+    if "lecture_num" not in st.session_state: st.session_state.lecture_num = None
     uploaded_file = st.file_uploader("PDF Presentation", type="pdf")
     if uploaded_file:
         st.session_state.lecture_title = uploaded_file.name[:-4].replace("_", " ")
 
     additional_files = st.file_uploader("Additional Files (Optional, Used as Extra Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
-    lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
+    
+    col1, col2 = st.columns([1,6])
+    with col1:
+        lect_num = st.number_input("Module Number (Optional)", step=1, min_value=1, value=st.session_state.lecture_num)
+    with col2:
+        lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
 
     # Initialize Supabase
     supabase_url = st.secrets["SUPABASE_URL"]
@@ -49,7 +55,7 @@ def main():
             filename = uploaded_file.name
             file = uploaded_file.read()
 
-            publicUrl = lect_gen(file, filename, lect_title)
+            publicUrl = lect_gen(file, filename, lect_title, lect_num)
             if publicUrl: 
                 if "lect_ids" in st.session_state:
                     st.session_state.lect_ids.append(lect_title)

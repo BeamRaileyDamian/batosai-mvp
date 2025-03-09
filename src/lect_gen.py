@@ -12,6 +12,7 @@ from langchain_groq import ChatGroq
 from firebase_admin import firestore
 from pydub import AudioSegment, effects
 from supabase import create_client, Client
+from google.cloud.firestore_v1 import FieldFilter
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
@@ -27,14 +28,45 @@ def post_template(content):
         - {content} 
     """
 
-def first_slide(text):
+def first_slide_no_prev(curr, next):
     return f"""
         Context:
-        - You are a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
-        - This slide is the title or the first slide, so you only need to introduce it really shallowly.
+        - You are a lecturer generating a script to introduce the first slide of a presentation.
+        - Since this is the title slide, provide only a brief introduction to the lecture.
+        - Conclude with a smooth and concise transition to the next slide.
 
-        Title Slide:
-        - {text}
+        Title Slide Content:
+        - {curr}
+
+        Next Slide Preview:
+        - {next}
+
+        Instructions:
+        - Keep the introduction engaging but shallow.
+        - Ensure a natural and brief transition to the next slide.
+    """
+
+def first_slide_with_prev(curr, next, prev_lesson):
+    return f"""
+        Context:
+        - You are a lecturer generating a script to introduce the first slide of a presentation.
+        - Since this is the title slide, provide only a brief introduction to the lecture.
+        - A summary of the previous lesson is provided. Briefly reference it (at most 3 sentences) using a natural transition (e.g., "In the previous lesson, we explored ___. Today, we will discuss ___.").
+        - Conclude with a smooth and concise transition to the next slide.
+
+        Previous Lesson Summary:
+        - {prev_lesson}
+
+        Title Slide Content:
+        - {curr}
+
+        Next Slide Preview:
+        - {next}
+
+        Instructions:
+        - Keep the introduction engaging but concise.
+        - Reference the previous lesson naturally and briefly.
+        - Ensure a smooth transition to the next slide.
     """
 
 def main_template(prev, curr, next):
@@ -89,10 +121,30 @@ def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucke
 def script_gen(llm, prev_slide, current_slide, next_slide):
     message = None
     raw_response = None
-    if prev_slide == "None":
-        message = first_slide(current_slide)
-    else: 
-        message = main_template(prev_slide, current_slide, next_slide)
+    message = main_template(prev_slide, current_slide, next_slide)
+
+    try: 
+        raw_response = llm.invoke(message).content
+    except Exception as e:
+        print(e)
+        return False
+    
+    # postprocessing
+    try: 
+        post_message = post_template(raw_response)
+        response = llm.invoke(post_message).content
+        return response
+    except Exception as e:
+        print(e)
+        return False
+    
+def script_gen_first_slide(llm, prev_lesson, current_slide, next_slide):
+    message = None
+    raw_response = None
+    if prev_lesson:
+        message = first_slide_with_prev(current_slide, next_slide, prev_lesson)
+    else:
+        message = first_slide_no_prev(current_slide, next_slide)
 
     try: 
         raw_response = llm.invoke(message).content
@@ -155,7 +207,7 @@ def quiz_gen(llm, pdf_content_str):
         print(e, response)
         return False
 
-def lect_gen(file, filename, lect_title):
+def lect_gen(file, filename, lect_title, lect_num):
     lect_script = []
     entire_pdf_content = []
 
@@ -169,7 +221,19 @@ def lect_gen(file, filename, lect_title):
     bucket_name = st.secrets["BUCKET_NAME"]
     bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
     bucket_folder_audio = st.secrets["BUCKET_FOLDER_AUDIO"]
-    
+
+    # Initialize Firebase Firestore
+    if not firebase_admin._apps:
+        cred = st.secrets["firebase"]["proj_settings"]
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+
+    prev_module = db.collection("lect_scripts").where(filter=FieldFilter("module_number", "==", lect_num-1)).limit(1).get()
+    prev_module_content = None
+    if prev_module:
+        first_doc = prev_module[0]  # Get the first document from the result
+        prev_module_content = '\n'.join([i["script"] for i in first_doc.to_dict()["script"]])
+
     # Open the PDF file and generate the lecture scripts
     doc = pymupdf.open(stream=file)
     for i in range(len(doc)):
@@ -180,7 +244,11 @@ def lect_gen(file, filename, lect_title):
         if i > 0: prev_slide = lect_script[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
 
-        script = script_gen(llm, prev_slide, current_slide, next_slide)
+        script = None
+        if i == 0:
+            script = script_gen_first_slide(llm, prev_module_content, current_slide, next_slide)
+        else:
+            script = script_gen(llm, prev_slide, current_slide, next_slide)
         if not script: return False
 
         public_url_audio, duration = tts_and_upload(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
@@ -205,15 +273,10 @@ def lect_gen(file, filename, lect_title):
     # generate 5-item quiz
     quiz = quiz_gen(llm, '\n'.join(entire_pdf_content))
 
-    # Initialize Firebase Firestore
-    if not firebase_admin._apps:
-        cred = st.secrets["firebase"]["proj_settings"]
-        firebase_admin.initialize_app(cred)
-    db = firestore.client()
-
     # Upload lecture script
     lecture = {
         "title": lect_title,
+        "module_number": lect_num,
         "script": lect_script,
         "pdf": filename,
         "pdf_url": publicUrl,
