@@ -3,7 +3,7 @@ import firebase_admin
 from firebase_admin import credentials
 
 def setup(tabname):
-    st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname)
+    st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname, menu_items={"About": "### Beam Damian - CMSC 190 ", "Report a Bug": "mailto:bmdamian@up.edu.ph", "Get help": "mailto:bmdamian@up.edu.ph"})
     st.logo("assets/sidebar_logo.png", icon_image="assets/main_logo.png", size="large")
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
     st.sidebar.page_link("pages/modules.py", label="Lessons", icon="🧑‍🏫")

@@ -57,7 +57,7 @@ def main():
             st.markdown(message["content"], unsafe_allow_html=True)
 
     # Accept user input
-    if prompt := st.chat_input("What is up?"):
+    if prompt := st.chat_input("Ask about OS"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         # Display user message in chat message container
