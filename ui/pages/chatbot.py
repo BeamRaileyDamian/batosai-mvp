@@ -27,7 +27,7 @@ def main():
         st.stop()
 
     if "selected_lect_id" not in st.session_state:
-        st.session_state.selected_lect_id = st.session_state.lect_ids[0]
+        st.session_state.selected_lect_id = "General"
 
     if st.session_state.lect_ids and 'retriever' not in st.session_state or 'groq_api_key' not in st.session_state:
         st.session_state.retriever, st.session_state.groq_api_key = retriever_setup(st.session_state.selected_lect_id)
@@ -39,7 +39,7 @@ def main():
     with col2: 
         st.selectbox(
             label="Chatbot Scope",
-            options=st.session_state.lect_ids,
+            options=["General"] + st.session_state.lect_ids,
             key="selected_lect_id",
             on_change=change_scope
         )

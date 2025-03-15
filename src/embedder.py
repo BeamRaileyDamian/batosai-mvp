@@ -10,17 +10,17 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
 
-def create_embeddings(pdfs_stream, collection_name, pdf_filenames, pdfs_url):
+def create_embeddings(pdfs_stream, lesson_id, pdf_filenames, pdfs_url):
     # Create (or update) the data store.
-    documents = load_documents(pdfs_stream, pdf_filenames, pdfs_url)
+    documents = load_documents(pdfs_stream, lesson_id, pdf_filenames, pdfs_url)
     chunks = split_documents(documents)
-    add_to_chroma(chunks, collection_name)
+    add_to_chroma(chunks)
     return True
 
 def get_embedding_function():
     return HuggingFaceEmbeddings(model_name=MODEL_NAME, model_kwargs={"device": "cpu"})
 
-def load_documents(pdf_streams: list[bytes], pdf_filenames: list[str], pdfs_url: list[str]):
+def load_documents(pdf_streams: list[bytes], lesson_id: str, pdf_filenames: list[str], pdfs_url: list[str]):
     # Create a temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_files = {}
@@ -44,6 +44,7 @@ def load_documents(pdf_streams: list[bytes], pdf_filenames: list[str], pdfs_url:
             if temp_path in temp_files:
                 doc.metadata["original_filename"] = temp_files[temp_path]
                 doc.metadata["url"] = temp_urls[temp_path]
+                doc.metadata["lesson_id"] = lesson_id
 
     return documents
 
@@ -56,10 +57,10 @@ def split_documents(documents: list[Document]):
     )
     return text_splitter.split_documents(documents)
 
-def add_to_chroma(chunks: list[Document], collection_name: str):
+def add_to_chroma(chunks: list[Document]):
     # Load the existing database.
     db = Chroma(
-        persist_directory=f'{CHROMA_PATH}/{collection_name}', embedding_function=get_embedding_function()
+        persist_directory=CHROMA_PATH, embedding_function=get_embedding_function()
     )
 
     # Calculate Page IDs.

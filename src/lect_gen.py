@@ -228,8 +228,10 @@ def lect_gen(file, filename, lect_title, lect_num):
         firebase_admin.initialize_app(cred)
     db = firestore.client()
 
-    prev_module = db.collection("lect_scripts").where(filter=FieldFilter("module_number", "==", lect_num-1)).limit(1).get()
+    prev_module = None
     prev_module_content = None
+    if lect_num:
+        prev_module = db.collection("lect_scripts").where(filter=FieldFilter("module_number", "==", lect_num-1)).limit(1).get()
     if prev_module:
         first_doc = prev_module[0]  # Get the first document from the result
         prev_module_content = '\n'.join([i["script"] for i in first_doc.to_dict()["script"]])
