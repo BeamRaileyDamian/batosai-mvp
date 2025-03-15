@@ -47,6 +47,7 @@ if st.session_state['authentication_status']:
         st.session_state.admin_title = f'Welcome, {st.session_state["name"]}'
         if st.button("Create a Lecture"): st.switch_page("pages/create_lect.py")
         if st.button("Edit a Lecture's Quiz"): st.switch_page("pages/edit_quiz_choice.py")
+        if st.button("Edit Quotes"): st.switch_page("pages/edit_quotes.py")
         if st.button("Delete a Lecture"): st.switch_page("pages/delete_lect.py")
         if authenticator.logout():
             st.session_state.admin_title = "Admin Panel"

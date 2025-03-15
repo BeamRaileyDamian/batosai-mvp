@@ -27,7 +27,7 @@ if quiz_items:
             edited_question = st.text_area(f"Edit Question {i+1}", item["question"], key=f"q_{i}")
             edited_answer = st.text_area(f"Edit Answer {i+1}", item["answer"], key=f"a_{i}")
             
-            col1, col2, col3 = st.columns([1, 1, 11])
+            col1, col2, col3 = st.columns([1, 1, 10])
             with col1:
                 if st.button("Update", key=f"update_{i}"):
                     quiz_items[i] = {"question": edited_question, "answer": edited_answer}
@@ -51,11 +51,6 @@ with st.expander("Add New Quiz Item"):
         if new_question and new_answer:
             quiz_items.append({"question": new_question, "answer": new_answer})
             st.session_state.lect_script_to_edit["quiz"] = quiz_items
-            st.success("Question added successfully!")
-            # Clear the input fields after adding
-            st.session_state["_question_key"] = ""
-            st.session_state["_answer_key"] = ""
-            time.sleep(1)
             st.rerun()
         else:
             st.error("Both question and answer are required.")
