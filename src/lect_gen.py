@@ -17,6 +17,9 @@ from google.cloud.firestore_v1 import FieldFilter
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
 
+def personality_prompt(lect_personality):  
+    return f"Your personality traits: {lect_personality}. Maintain a balanced approach: while these traits should shape your style, your primary role is to be an effective lecturer."
+
 def post_template(content):
     return f"""
         Context:
@@ -28,12 +31,13 @@ def post_template(content):
         - {content} 
     """
 
-def first_slide_no_prev(curr, next):
+def first_slide_no_prev(curr, next, lect_personality):
     return f"""
         Context:
-        - You are a lecturer generating a script to introduce the first slide of a presentation.
+        - You are Sir Jac, a lecturer generating a script to introduce the first slide of a presentation.
         - Since this is the title slide, provide only a brief introduction to the lecture.
         - Conclude with a smooth and concise transition to the next slide.
+        - {personality_prompt(lect_personality)}
 
         Title Slide Content:
         - {curr}
@@ -46,13 +50,14 @@ def first_slide_no_prev(curr, next):
         - Ensure a natural and brief transition to the next slide.
     """
 
-def first_slide_with_prev(curr, next, prev_lesson):
+def first_slide_with_prev(curr, next, prev_lesson, lect_personality):
     return f"""
         Context:
-        - You are a lecturer generating a script to introduce the first slide of a presentation.
+        - You are Sir Jac, a lecturer generating a script to introduce the first slide of a presentation.
         - Since this is the title slide, provide only a brief introduction to the lecture.
         - A summary of the previous lesson is provided. Briefly reference it (at most 3 sentences) using a natural transition (e.g., "In the previous lesson, we explored ___. Today, we will discuss ___.").
         - Conclude with a smooth and concise transition to the next slide.
+        - {personality_prompt(lect_personality)}
 
         Previous Lesson Summary:
         - {prev_lesson}
@@ -69,13 +74,14 @@ def first_slide_with_prev(curr, next, prev_lesson):
         - Ensure a smooth transition to the next slide.
     """
 
-def main_template(prev, curr, next):
+def main_template(prev, curr, next, lect_personality):
     return f"""
         Context:
         - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
         - The script should be at most 150 words.
         - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
+        - {personality_prompt(lect_personality)}
 
         Slide Content:
         - Current Slide: {curr}
@@ -118,10 +124,10 @@ def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucke
     public_url = supabase.storage.from_(bucket_name).get_public_url(storage_path)
     return public_url.rstrip("?")
 
-def script_gen(llm, prev_slide, current_slide, next_slide):
+def script_gen(llm, prev_slide, current_slide, next_slide, lect_personality):
     message = None
     raw_response = None
-    message = main_template(prev_slide, current_slide, next_slide)
+    message = main_template(prev_slide, current_slide, next_slide, lect_personality)
 
     try: 
         raw_response = llm.invoke(message).content
@@ -138,13 +144,13 @@ def script_gen(llm, prev_slide, current_slide, next_slide):
         print(e)
         return False
     
-def script_gen_first_slide(llm, prev_lesson, current_slide, next_slide):
+def script_gen_first_slide(llm, prev_lesson, current_slide, next_slide, lect_personality):
     message = None
     raw_response = None
     if prev_lesson:
-        message = first_slide_with_prev(current_slide, next_slide, prev_lesson)
+        message = first_slide_with_prev(current_slide, next_slide, prev_lesson, lect_personality)
     else:
-        message = first_slide_no_prev(current_slide, next_slide)
+        message = first_slide_no_prev(current_slide, next_slide, lect_personality)
 
     try: 
         raw_response = llm.invoke(message).content
@@ -207,7 +213,7 @@ def quiz_gen(llm, pdf_content_str):
         print(e, response)
         return False
 
-def lect_gen(file, filename, lect_title, lect_num):
+def lect_gen(file, filename, lect_title, lect_num, lect_personality):
     lect_script = []
     entire_pdf_content = []
 
@@ -248,9 +254,9 @@ def lect_gen(file, filename, lect_title, lect_num):
 
         script = None
         if i == 0:
-            script = script_gen_first_slide(llm, prev_module_content, current_slide, next_slide)
+            script = script_gen_first_slide(llm, prev_module_content, current_slide, next_slide, lect_personality)
         else:
-            script = script_gen(llm, prev_slide, current_slide, next_slide)
+            script = script_gen(llm, prev_slide, current_slide, next_slide, lect_personality)
         if not script: return False
 
         public_url_audio, duration = tts_and_upload(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)

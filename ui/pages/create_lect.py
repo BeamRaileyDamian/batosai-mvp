@@ -2,6 +2,7 @@ import sys
 import os
 from utils import *
 import streamlit as st
+from streamlit_tags import st_tags
 from supabase import create_client, Client
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -36,11 +37,19 @@ def main():
 
     additional_files = st.file_uploader("Additional Files (Optional, Used as Extra Knowledge Base for Answering Students' Questions)", type="pdf", accept_multiple_files=True)
     
-    col1, col2 = st.columns([1,6])
+    col1, col2, col3 = st.columns([1, 2, 3])
     with col1:
         lect_num = st.number_input("Module Number (Optional)", step=1, min_value=1, value=st.session_state.lecture_num)
     with col2:
         lect_title = st.text_input("Lecture Title", value=st.session_state.lecture_title)
+    with col3: 
+        options = [
+            "Charismatic", "Approachable", "Witty", "Playful",  # Communication Style & Engagement
+            "Storyteller", "Dramatic", "Mysterious",  # Teaching Style & Delivery
+            "Smart", "Nerdy", "Organized",  # Knowledge & Structure
+            "Inspirational", "Wholesome", "Chill", "Strict"  # Attitude & Approachability
+        ]
+        lect_personality = st.multiselect(label=f"Lecturer Personality", default=["Chill", "Approachable", "Smart"], options=options, max_selections=3)
 
     # Initialize Supabase
     supabase_url = st.secrets["SUPABASE_URL"]
@@ -51,11 +60,11 @@ def main():
     if st.button("Create"):
         if lect_title in st.session_state.lect_ids:
             st.warning("Lecture Title Already Exists")
-        elif uploaded_file and lect_title and uploaded_file.type == "application/pdf":
+        elif uploaded_file and lect_title and lect_personality and uploaded_file.type == "application/pdf":
             filename = uploaded_file.name
             file = uploaded_file.read()
 
-            publicUrl = lect_gen(file, filename, lect_title, lect_num)
+            publicUrl = lect_gen(file, filename, lect_title, lect_num, lect_personality)
             if publicUrl: 
                 if "lect_ids" in st.session_state:
                     st.session_state.lect_ids.append(lect_title)
@@ -88,6 +97,8 @@ def main():
             st.error("PDF Presentation is Required")
         elif not lect_title:
             st.error("Lecture Title is Required")
+        elif not lect_personality:
+            st.error("Select at least one lecturer personality")
 
 if __name__ == "__main__":
     main()
