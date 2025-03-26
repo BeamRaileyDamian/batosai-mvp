@@ -2,7 +2,6 @@ import sys
 import os
 from utils import *
 import streamlit as st
-from streamlit_tags import st_tags
 from supabase import create_client, Client
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))

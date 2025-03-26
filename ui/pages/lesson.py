@@ -37,20 +37,15 @@ def main():
     url = st.session_state.lect_script["pdf_url"]
     response = requests.get(url)
 
-    if "curr_slide" not in st.session_state: st.session_state.curr_slide = 1
+    if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 3
 
-    avatar_url = requests.get("https://lottie.host/8c807468-4a5f-4085-8448-c6cbafd6643f/4c1RYcE5zN.json") 
+    avatar_url = requests.get(st.secrets["GIF"]) 
     avatar_url_json = dict() 
     if avatar_url.status_code == 200: avatar_url_json = avatar_url.json() 
     else: print("Error in the URL") 
 
     quote = get_quote()
-
-    # idle_avatar_url = requests.get("https://lottie.host/55d3adb1-d6e2-40b0-9e65-79f0d26a1371/SlDkuvx5Uj.json") 
-    # idle_avatar_url_json = dict() 
-    # if idle_avatar_url.status_code == 200: idle_avatar_url_json = idle_avatar_url.json() 
-    # else: print("Error in the URL") 
 
     if screen_width:
         col1, col2 = st.columns([0.85, 0.15], border=False)
@@ -101,32 +96,33 @@ def main():
         </style>
         """, unsafe_allow_html=True)
         
-        for slide in range(st.session_state.lect_script["slides_count"]):
-            if slide == 0:
+        first_slide_relative = True
+        for st.session_state.curr_slide in range(st.session_state.curr_slide, st.session_state.lect_script["slides_count"]):
+            if first_slide_relative:
+                first_slide_relative = False
                 with col2_placeholder:
-                    st_lottie(avatar_url_json, key=f"small_lottie_{slide}", width=int(screen_width*0.15))
-                    
-                    # Add transcript container under the Lottie animation
+                    st_lottie(avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.15))
+
                     with transcript_placeholder:
-                        transcript_text = st.session_state.lect_script["script"][slide]["script"]
+                        transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
                         st.markdown(f'<div class="transcript-container">{transcript_text}</div>', unsafe_allow_html=True)
+                        if st.button("Back to Lessons"): st.page_link("pages/modules.py")
 
             with col1:
                 with col1_placeholder:
                     pdf_viewer(
                         input=response.content, 
                         width=int(screen_width*0.85),
-                        pages_to_render=[slide+1],
+                        pages_to_render=[st.session_state.curr_slide+1],
                         render_text=True
                     )
             
             try:
-                mp3_url = st.session_state.lect_script["script"][slide]["audio"]
-                duration = st.session_state.lect_script["script"][slide]["duration"]
+                mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide]["audio"]
+                duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"]
                 
-                # Update transcript for current slide
                 with transcript_placeholder:
-                    transcript_text = st.session_state.lect_script["script"][slide]["script"]
+                    transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
                     st.markdown(f'<div class="transcript-container">{transcript_text}</div>', unsafe_allow_html=True)
                 
                 audio_html = f'''
@@ -171,7 +167,7 @@ def main():
                 with timer_placeholder:
                     st.empty()
                 st.session_state.countdown -= 1
-            timer_placeholder.write("Time's up! ⏰")
+            with timer_placeholder: st.markdown(f'<div class="timer">Time\'s up! ⏰</div>', unsafe_allow_html=True)
             time.sleep(1)
 
         # Clear all the placeholders after time is up
@@ -213,11 +209,13 @@ def main():
             # Show time's up message temporarily
             with timer_placeholder:
                 st.markdown(f'<div class="timer">Time\'s up! ⏰</div>', unsafe_allow_html=True)
+                time.sleep(1)
         
         ################# QUIZ ANSWERS ############################
         # Clear quiz content
         quiz_header_placeholder.empty()
         quiz_content_placeholder.empty()
+        st.session_state.curr_slide = 1
         
         with col1:
             answers_header_placeholder = st.empty()
@@ -231,6 +229,10 @@ def main():
                 answers_content += f'<div class="quiz-answer">{st.session_state.lect_script["quiz"][i]["answer"]}</div>'
             
             answers_content_placeholder.markdown(answers_content, unsafe_allow_html=True)
+
+        with col2:
+            with timer_placeholder: st.empty()
+            st.page_link("pages/modules.py", label="Back to Lessons")
     
 if __name__ == "__main__":
     main()
