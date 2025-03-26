@@ -64,7 +64,7 @@ def rerank(documents, query):
 
 def create_template():
     PROMPT_TEMPLATE = """
-    Answer the question based only on the following context. The following data should be treated as facts you are familiar with:
+    Answer the question using the following context. The following data should be treated as facts you are familiar with:
 
     {context}
 
