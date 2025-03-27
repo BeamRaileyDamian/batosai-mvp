@@ -22,9 +22,9 @@ def main():
     )
 
     if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
-        st.session_state.admin_title = "Admin Panel"
+        st.session_state.admin_title = "⚙️ Admin Panel"
     elif st.session_state["authentication_status"] and st.session_state["name"]:
-        st.session_state.admin_title = f'Welcome, {config['credentials']['usernames'][st.session_state["username"]]["name"]}'
+        st.session_state.admin_title = f'👋 Welcome, {config['credentials']['usernames'][st.session_state["username"]]["name"]}'
 
     st.title(st.session_state.admin_title)
 
@@ -39,11 +39,11 @@ def main():
 
     if st.session_state['authentication_status']:
             st.session_state.admin_title = f'Welcome, {st.session_state["name"]}'
-            if st.button("Create a Lecture"): st.switch_page("pages/create_lect.py")
-            if st.button("Edit a Lecture's Quiz"): st.switch_page("pages/edit_quiz_choice.py")
-            if st.button("Edit Quotes"): st.switch_page("pages/edit_quotes.py")
-            if st.button("Delete a Lecture"): st.switch_page("pages/delete_lect.py")
-            if authenticator.logout():
+            if st.button("👨‍🏫 Create a Lecture"): st.switch_page("pages/create_lect.py")
+            if st.button("🧠 Edit a Lecture's Quiz"): st.switch_page("pages/edit_quiz_choice.py")
+            if st.button("💬 Edit Quotes"): st.switch_page("pages/edit_quotes.py")
+            if st.button("❌ Delete a Lecture"): st.switch_page("pages/delete_lect.py")
+            if authenticator.logout("🔒 Log out"):
                 st.session_state.admin_title = "Admin Panel"
                 st.rerun()
 

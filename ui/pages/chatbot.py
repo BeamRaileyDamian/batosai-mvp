@@ -28,7 +28,7 @@ def main():
     col1, col2 = st.columns([3, 1])  # Adjust the widths of columns
 
     with col1:
-        st.title("Chatbot")
+        st.title("🗨️ Chatbot")
     with col2: 
         st.selectbox(
             label="Chatbot Scope",

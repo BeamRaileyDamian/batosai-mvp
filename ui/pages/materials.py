@@ -106,7 +106,7 @@ def main():
 
     col1, col2 = st.columns([4,1])
     with col1:
-        st.title("CMSC 125 Materials")
+        st.title("📚 CMSC 125 Materials")
     with col2:
         # Use a single container for all button states
         button_container = st.container()
@@ -116,7 +116,7 @@ def main():
             if st.session_state.download_initiated:
                 st.success("Download completed!")
             elif not st.session_state.zip_ready:
-                if st.button("Create Zip File"):
+                if st.button("📦 Create Zip File"):
                     create_zip()
             else:
                 st.download_button(
@@ -130,7 +130,7 @@ def main():
                 )
 
     for folder in structure:
-        st.header(folder["folder"])
+        st.header(f"📁 {folder['folder']}")
         for file in folder["contents"]:
             # st.write(file["file"])
             st.download_button(
@@ -138,7 +138,7 @@ def main():
                 data=requests.get(file["public_url"]).content,
                 file_name=file["file"],
                 mime="application/pdf",
-                icon=":material/download:",
+                icon="⬇️",
                 key=folder["folder"]+"_"+file["file"]
             )
         st.divider()

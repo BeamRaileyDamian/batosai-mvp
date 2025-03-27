@@ -4,12 +4,28 @@ from firebase_admin import credentials, firestore
 
 def setup(tabname):
     st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname, menu_items={"About": "### Beam Damian - CMSC 190 ", "Report a Bug": "mailto:bmdamian@up.edu.ph", "Get help": "mailto:bmdamian@up.edu.ph"})
+    global_styles()
     st.logo("assets/sidebar_logo.png", icon_image="assets/main_logo.png", size="large")
     st.sidebar.page_link("Home.py", label="Home", icon="🏠")
     st.sidebar.page_link("pages/modules.py", label="Lessons", icon="🧑‍🏫")
     st.sidebar.page_link("pages/materials.py", label="Materials", icon="📚")
     st.sidebar.page_link("pages/chatbot.py", label="Chatbot", icon="🗨️")
     st.sidebar.page_link("pages/admin.py", label="Admin Panel", icon="⚙️")
+
+def global_styles():
+    st.markdown("""
+    <style>
+    * {
+        font-family: 'Inter', serif !important;
+        letter-spacing: 0.5px !important;
+    }
+    
+    h2 {
+        font-size: 30px !important;
+        font-weight: bold;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 def get_all_document_ids(db, collection_name):
     try:
@@ -57,13 +73,23 @@ def button_styles():
     st.markdown("""
     <style>
     div.stButton > button {
-        width: 420px !important;
+        width: 35% !important;
         display: flex !important;
         justify-content: flex-start !important;
         text-align: left !important;
-        white-space: normal !important; /* Allows text wrapping */
-        word-wrap: break-word !important; /* Ensures long words wrap */
-        overflow-wrap: break-word !important; /* Alternative wrapping method */
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        background-color: #486f4f !important;
+        color: white !important;
+        border-radius: 8px !important;
+        padding: 10px 15px !important;
+        border: 1px solid #284329 !important;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
+    }
+
+    div.stButton > button:hover {
+        background-color: #59B75B !important;
     }
     </style>
     """, unsafe_allow_html=True)

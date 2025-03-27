@@ -3,21 +3,73 @@ import random
 import base64
 import requests
 from utils import *
-import firebase_admin
 import streamlit as st
 import streamlit_js_eval
-from firebase_admin import firestore
 from streamlit_lottie import st_lottie
 from streamlit_pdf_viewer import pdf_viewer
 
-def get_quote():
-    if not firebase_admin._apps:
-        cred = st.secrets["firebase"]["proj_settings"]
-        firebase_admin.initialize_app(cred)
-    db = firestore.client()
+def apply_styles():
+    st.markdown("""
+        <style>
+        .transcript-container {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            color: #4b644c;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 3px solid #4682b4;
+            max-height: 550px;
+            overflow-y: auto;
+        }
+        .quiz-question {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .quiz-answer {
+            font-size: 18px;
+            color: #4b644c;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-left: 4px solid #59B75B;
+            border-radius: 5px;
+        }
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 10px;
+            text-align: center;
+            
+            background-color: #59B75B !important;
+            color: white !important;
+            border-radius: 8px !important;
+            border: 1px solid #284329 !important;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
+        }
+                
+        button {
+            width: 35% !important;
+            display: flex !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            background-color: #486f4f !important;
+            color: white !important;
+            border-radius: 8px !important;
+            padding: 10px 15px !important;
+            border: 1px solid #284329 !important;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
+def get_quote():
     try:
-        collection_ref = db.collection("quotes")
+        collection_ref = st.session_state.db.collection("quotes")
         docs = collection_ref.stream()
         doc_list = list(docs)
         random_doc = random.choice(doc_list)
@@ -50,6 +102,7 @@ def main():
     else: print("Error in the URL") 
 
     quote = get_quote()
+    apply_styles()
 
     if screen_width:
         col1, col2 = st.columns([0.85, 0.15], border=False)
@@ -59,46 +112,6 @@ def main():
         with col2:
             col2_placeholder = st.empty()
             transcript_placeholder = st.empty()
-        
-        st.markdown("""
-        <style>
-        .transcript-container {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            color: #4b644c;
-            padding: 10px;
-            margin-top: 10px;
-            border-left: 3px solid #4682b4;
-            font-size: 17px;
-            font-family: Arial;
-            max-height: 550px;
-            overflow-y: auto;
-        }
-        .quiz-question {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .quiz-answer {
-            font-size: 18px;
-            color: #4b644c;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f0f8ff;
-            border-left: 4px solid #4682b4;
-            border-radius: 5px;
-        }
-        .timer {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;  
-            border: 3px solid #FF5733; 
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        </style>
-        """, unsafe_allow_html=True)
         
         first_slide_relative = True
         for st.session_state.curr_slide in range(st.session_state.curr_slide, st.session_state.lect_script["slides_count"]):
@@ -110,7 +123,6 @@ def main():
                     with transcript_placeholder:
                         transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
                         st.markdown(f'<div class="transcript-container">{transcript_text}</div>', unsafe_allow_html=True)
-                        if st.button("Back to Lessons"): st.page_link("pages/modules.py")
 
             with col1:
                 with col1_placeholder:
@@ -219,7 +231,8 @@ def main():
         # Clear quiz content
         quiz_header_placeholder.empty()
         quiz_content_placeholder.empty()
-        st.session_state.curr_slide = 1
+        st.session_state.curr_slide = 0
+        st.session_state.countdown = 3
         
         with col1:
             answers_header_placeholder = st.empty()

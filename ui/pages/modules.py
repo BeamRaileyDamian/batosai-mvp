@@ -10,13 +10,15 @@ def main():
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
 
     setup("Lessons")
-    st.title("CMSC 125 Lessons")
+    st.title("🧑‍🏫 CMSC 125 Lessons")
     button_styles()
+    study_emojis = ["📚", "📖", "📝", "🎓", "📕", "📂", "📑", "🖊️", "📒", "📜", "💡", "🧠", "🗂️"]
 
     if st.session_state.lect_ids:
-        for id in st.session_state.lect_ids:
+        for i, id in enumerate(st.session_state.lect_ids):
             module_number = st.session_state.module_numbers.get(id, None)
-            text = f"Module {module_number}: {id}" if module_number is not None else id
+            emoji = study_emojis[i % len(study_emojis)]
+            text = f"{emoji} Module {module_number}: {id}" if module_number is not None else f"{emoji} {id}"
             if st.button(text):
                 if st.session_state.curr_lect != id:
                     st.session_state.curr_lect = id
