@@ -24,6 +24,18 @@ def global_styles():
         font-size: 30px !important;
         font-weight: bold;
     }
+                
+    div.stButton > button {
+        background-color: #486f4f !important;
+        color: white !important;
+        padding: 10px 15px !important;
+        border: 1px solid #284329 !important;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
+    }
+
+    div.stButton > button:hover {
+        background-color: #59B75B !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 

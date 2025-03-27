@@ -5,6 +5,9 @@ def main():
     if "lect_script_to_edit" not in st.session_state or not st.session_state.lect_script_to_edit or "lect_to_edit" not in st.session_state or not st.session_state.lect_to_edit: 
         st.switch_page("pages/edit_quiz_choice.py")
 
+    fetch_module_numbers()
+    fetch_lect_ids()
+    sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
     setup("Edit Quiz")
     st.title("Edit Quiz")
 

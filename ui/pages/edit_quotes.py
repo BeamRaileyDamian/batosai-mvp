@@ -2,6 +2,9 @@ import streamlit as st
 from utils import *
 
 def main():
+    fetch_module_numbers()
+    fetch_lect_ids()
+    sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
     collection_ref = st.session_state.db.collection("quotes")
 
     # Initialize quotes in session state
@@ -35,7 +38,7 @@ def main():
                             st.session_state.quotes[i]["data"]["quote"] = edited_quote
                             if "id" in st.session_state.quotes[i]:
                                 st.session_state.modified_quotes.add(st.session_state.quotes[i]["id"])
-                            st.success("Quote updated!")
+                            #st.success("Quote updated!")
                             st.rerun()
                 with col2:
                     if st.button("Delete", key=f"delete_{i}"):
