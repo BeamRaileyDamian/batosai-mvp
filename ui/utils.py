@@ -26,7 +26,47 @@ def fetch_lect_ids():
         db = firestore.client()
         st.session_state.db = db
 
-    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(st.session_state.db, "lect_scripts")
+
+def sort_lectures(lect_id, module_numbers):
+    lect_id.sort(key=lambda x: (
+        x not in module_numbers,  # Prioritize items in module_numbers first
+        module_numbers.get(x, float('inf')) if module_numbers.get(x) is not None else float('inf'),  # Handle None case
+        x  # Lexicographic order for remaining
+    ))
+
+def fetch_module_numbers():
+    if "db" not in st.session_state:
+        if not firebase_admin._apps:
+            init_firebase()
+        db = firestore.client()
+        st.session_state.db = db
+
+    if "module_numbers" not in st.session_state:
+        dict = {}
+        try:
+            collection_ref = st.session_state.db.collection("lect_scripts")
+            docs = collection_ref.stream()
+            for doc in docs:
+                dict[doc.id] = doc.to_dict()["module_number"]
+            st.session_state.module_numbers = dict
+        except Exception as e:
+            return f"Error retrieving document IDs: {str(e)}"
+
+def button_styles():
+    st.markdown("""
+    <style>
+    div.stButton > button {
+        width: 420px !important;
+        display: flex !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        white-space: normal !important; /* Allows text wrapping */
+        word-wrap: break-word !important; /* Ensures long words wrap */
+        overflow-wrap: break-word !important; /* Alternative wrapping method */
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 @st.cache_resource
 def init_firebase():

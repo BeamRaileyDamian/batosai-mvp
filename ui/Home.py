@@ -10,7 +10,9 @@ torch.classes.__path__ = []
 def main():
     setup("bat.OS.AI")
     st.title("💡 Welcome to bat.OS.AI!")
+    fetch_module_numbers()
     fetch_lect_ids()
+    sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
 
     st.markdown(
         """

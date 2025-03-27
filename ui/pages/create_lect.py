@@ -28,6 +28,7 @@ def main():
     setup("Create a Lecture")
     st.title("Create a Lecture")
     fetch_lect_ids()
+    fetch_module_numbers()
 
     if "lecture_title" not in st.session_state: st.session_state.lecture_title = ""
     if "lecture_num" not in st.session_state: st.session_state.lecture_num = None
@@ -67,7 +68,9 @@ def main():
             publicUrl = lect_gen(file, filename, lect_title, lect_num, lect_personality)
             if publicUrl: 
                 st.session_state.lect_ids.append(lect_title)
-                st.session_state.lect_ids.sort()
+                if lect_num:
+                    st.session_state.module_numbers[lect_title] = lect_num
+                sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
             else: 
                 st.error("Lecture Creation Failed")
                 return

@@ -5,6 +5,7 @@ import streamlit_authenticator as stauth
 def main():
     setup("Admin Panel")
     fetch_lect_ids()
+    button_styles()
 
     config = {
         "credentials": st.secrets["credentials"].to_dict(),

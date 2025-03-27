@@ -1,9 +1,13 @@
+import os
+import sys
 from utils import *
 import streamlit as st
 from supabase import create_client
 from langchain_chroma import Chroma
-from embedder import get_embedding_function
-from config import *
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+from src.embedder import get_embedding_function
+from src.config import *
 
 def delete_from_firebase(db, collection_name, document_id):
     try:
@@ -36,7 +40,10 @@ def delete_supabase_folder(client, bucket_name, folder_name):
 def main():
     setup("Delete a Lecture")
     st.title("Delete a Lecture")
+    fetch_module_numbers()
     fetch_lect_ids()
+    sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
+    button_styles()
 
     # Initialize Supabase client
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
@@ -49,7 +56,9 @@ def main():
 
     if st.session_state.lect_ids:
         for id in st.session_state.lect_ids:
-            if st.button(id, key=id):
+            module_number = st.session_state.module_numbers.get(id, None)
+            text = f"Module {module_number}: {id}" if module_number is not None else id
+            if st.button(text, key=id):
                 result = delete_from_firebase(st.session_state.db, "lect_scripts", id)
                 result2 = delete_supabase_folder(client, bucket_name, f"{folder_name}/{id}/")
 
