@@ -1,11 +1,10 @@
 from utils import *
-import firebase_admin
 import streamlit as st
-from firebase_admin import firestore
 import streamlit_authenticator as stauth
 
 def main():
     setup("Admin Panel")
+    fetch_lect_ids()
 
     config = {
         "credentials": st.secrets["credentials"].to_dict(),
@@ -38,13 +37,6 @@ def main():
         st.error(f"Error: {e}")
 
     if st.session_state['authentication_status']:
-            if not firebase_admin._apps:
-                init_firebase()
-            db = firestore.client()
-
-            if "lect_ids" not in st.session_state:
-                st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
-
             st.session_state.admin_title = f'Welcome, {st.session_state["name"]}'
             if st.button("Create a Lecture"): st.switch_page("pages/create_lect.py")
             if st.button("Edit a Lecture's Quiz"): st.switch_page("pages/edit_quiz_choice.py")

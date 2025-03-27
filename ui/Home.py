@@ -1,8 +1,6 @@
 import torch
 from utils import *
-import firebase_admin
 import streamlit as st
-from firebase_admin import firestore
 
 # __import__('pysqlite3')
 # import sys
@@ -12,12 +10,7 @@ torch.classes.__path__ = []
 def main():
     setup("bat.OS.AI")
     st.title("💡 Welcome to bat.OS.AI!")
-
-    if not firebase_admin._apps:
-        init_firebase()
-    db = firestore.client()
-
-    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+    fetch_lect_ids()
 
     st.markdown(
         """

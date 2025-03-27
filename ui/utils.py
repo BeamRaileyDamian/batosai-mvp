@@ -1,6 +1,6 @@
 import streamlit as st
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
 
 def setup(tabname):
     st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname, menu_items={"About": "### Beam Damian - CMSC 190 ", "Report a Bug": "mailto:bmdamian@up.edu.ph", "Get help": "mailto:bmdamian@up.edu.ph"})
@@ -18,7 +18,16 @@ def get_all_document_ids(db, collection_name):
         return [doc.id for doc in docs]
     except Exception as e:
         return f"Error retrieving document IDs: {str(e)}"
-    
+
+def fetch_lect_ids():
+    if "db" not in st.session_state:
+        if not firebase_admin._apps:
+            init_firebase()
+        db = firestore.client()
+        st.session_state.db = db
+
+    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+
 @st.cache_resource
 def init_firebase():
     cred = credentials.Certificate(dict(st.secrets["firebase"]["proj_settings"]))

@@ -3,8 +3,6 @@ import sys
 import time
 from utils import *
 import streamlit as st
-import firebase_admin
-from firebase_admin import firestore
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from retriever import rag_pipeline, retriever_setup, create_retriever
@@ -15,12 +13,7 @@ def change_scope():
 
 def main():
     setup("Chatbot")
-
-    if not firebase_admin._apps:
-        init_firebase()
-    db = firestore.client()
-
-    if 'lect_ids' not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
+    fetch_lect_ids()
     
     if not st.session_state.lect_ids:
         st.warning("No modules available. Ask admin to create modules to proceed.")

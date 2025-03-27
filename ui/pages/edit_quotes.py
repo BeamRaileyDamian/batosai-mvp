@@ -1,15 +1,8 @@
 import streamlit as st
-import firebase_admin
-import time
 from utils import *
-from firebase_admin import firestore
 
 def main():
-    if not firebase_admin._apps:
-        init_firebase()
-    db = firestore.client()
-
-    collection_ref = db.collection("quotes")
+    collection_ref = st.session_state.db.collection("quotes")
 
     # Initialize quotes in session state
     if "quotes" not in st.session_state:

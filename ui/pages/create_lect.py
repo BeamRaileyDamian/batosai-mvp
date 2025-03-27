@@ -27,6 +27,7 @@ def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucke
 def main():
     setup("Create a Lecture")
     st.title("Create a Lecture")
+    fetch_lect_ids()
 
     if "lecture_title" not in st.session_state: st.session_state.lecture_title = ""
     if "lecture_num" not in st.session_state: st.session_state.lecture_num = None
@@ -65,9 +66,8 @@ def main():
 
             publicUrl = lect_gen(file, filename, lect_title, lect_num, lect_personality)
             if publicUrl: 
-                if "lect_ids" in st.session_state:
-                    st.session_state.lect_ids.append(lect_title)
-                    st.session_state.lect_ids.sort()
+                st.session_state.lect_ids.append(lect_title)
+                st.session_state.lect_ids.sort()
             else: 
                 st.error("Lecture Creation Failed")
                 return

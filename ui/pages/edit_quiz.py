@@ -1,16 +1,9 @@
 import streamlit as st
-import firebase_admin
 from utils import *
-from firebase_admin import firestore
 
 def main():
-    if not firebase_admin._apps:
-        init_firebase()
-    db = firestore.client()
-
-    if "lect_ids" not in st.session_state: st.session_state.lect_ids = get_all_document_ids(db, "lect_scripts")
-    if "lect_script_to_edit" not in st.session_state: st.session_state.lect_script_to_edit = None
-    if "lect_to_edit" not in st.session_state: st.session_state.lect_to_edit = None
+    if "lect_script_to_edit" not in st.session_state or not st.session_state.lect_script_to_edit or "lect_to_edit" not in st.session_state or not st.session_state.lect_to_edit: 
+        st.switch_page("pages/edit_quiz_choice.py")
 
     setup("Edit Quiz")
     st.title("Edit Quiz")
@@ -57,7 +50,7 @@ def main():
 
     # Save changes to database
     if st.button("Save All Changes"):
-        doc_ref = db.collection("lect_scripts").document(st.session_state.lect_to_edit)
+        doc_ref = st.session_state.db.collection("lect_scripts").document(st.session_state.lect_to_edit)
         doc_ref.set(st.session_state.lect_script_to_edit)
         st.success("Quiz saved successfully!")
 

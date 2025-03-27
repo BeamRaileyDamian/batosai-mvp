@@ -1,7 +1,5 @@
 from utils import *
-import firebase_admin
 import streamlit as st
-from firebase_admin import firestore
 from supabase import create_client
 from langchain_chroma import Chroma
 from embedder import get_embedding_function
@@ -36,12 +34,9 @@ def delete_supabase_folder(client, bucket_name, folder_name):
         return False
 
 def main():
-    if not firebase_admin._apps:
-        init_firebase()
-    db = firestore.client()
-
     setup("Delete a Lecture")
     st.title("Delete a Lecture")
+    fetch_lect_ids()
 
     # Initialize Supabase client
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
@@ -55,16 +50,15 @@ def main():
     if st.session_state.lect_ids:
         for id in st.session_state.lect_ids:
             if st.button(id, key=id):
-                result = delete_from_firebase(db, "lect_scripts", id)
+                result = delete_from_firebase(st.session_state.db, "lect_scripts", id)
                 result2 = delete_supabase_folder(client, bucket_name, f"{folder_name}/{id}/")
 
-                db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())
-                db.delete(where={"lesson_id": id})
+                chroma_db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())
+                chroma_db.delete(where={"lesson_id": id})
                 
                 if result and result2:
                     st.session_state.lect_ids.remove(id)
                     st.rerun()
-                    # st.success("Lecture Successfully Deleted")
                 else:
                     st.success("Lecture Deletion Failed")
     else:

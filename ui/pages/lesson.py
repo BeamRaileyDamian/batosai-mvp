@@ -32,7 +32,11 @@ def load_gif(file_path):
     return encoded
 
 def main():
-    if "curr_lect" in st.session_state: setup(st.session_state.curr_lect)
+    if not "curr_lect" in st.session_state or not st.session_state.curr_lect or not "lect_script" in st.session_state or not st.session_state.lect_script: 
+        st.switch_page("pages/modules.py")
+    else: 
+        setup(st.session_state.curr_lect)
+
     screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
     url = st.session_state.lect_script["pdf_url"]
     response = requests.get(url)
