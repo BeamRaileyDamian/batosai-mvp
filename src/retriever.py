@@ -52,13 +52,14 @@ def rerank(documents, query):
     reranked_docs = []
     for result in results:
         idx = result["index"]  # Get the original index
-        reranked_docs.append({
-            "document": {
-                "text": docs_with_metadata[idx]["text"],
-                "metadata": docs_with_metadata[idx]["metadata"]
-            },
-            "relevance_score": result["relevance_score"]
-        })
+        if result["relevance_score"] >= RELEVANCE_THRESHOLD:
+            reranked_docs.append({
+                "document": {
+                    "text": docs_with_metadata[idx]["text"],
+                    "metadata": docs_with_metadata[idx]["metadata"]
+                },
+                "relevance_score": result["relevance_score"]
+            })
     
     return reranked_docs
 
@@ -81,11 +82,12 @@ def create_template():
 def is_relevant(query, llm):
     prompt = f"""
     You are an intelligent tutor for a course on Operating Systems.
-    Your task is to determine whether the given question is relevant to the subject OR if it is possibly a follow-up or clarifying question such as "again" or "make it simpler" and if it is academic in nature.
+    Your task is to determine whether the given question is relevant to the subject or if it is a follow-up or clarifying question or command.
+    Answer only "no" if you are certain that it is about something else. Consider the possibility that it is a follow-up question.
 
     Question: "{query}"
 
-    Answer only with "yes" if it is relevant and "no" if it is not.
+    Answer only with "yes" or "no"
     """
 
     response = llm.invoke(prompt)
@@ -94,7 +96,8 @@ def is_relevant(query, llm):
 def unable_to_answer(query, llm):
     prompt = f"""
     You are an intelligent tutor for a course on Operating Systems.
-    Say that you are unable to answer the following question due to your scope and ethics, if it applies.
+    Depending on the query, you can say that you are unable to answer the following question due to your scope and ethics, if it applies. 
+    If it is just conversation, like "thank you", just respond accordingly.
 
     Question: "{query}"
     """
@@ -131,6 +134,7 @@ def format_docs(docs):
     return "\n\n".join(formatted_texts), [doc["document"]["metadata"] for doc in docs]
 
 def rag_pipeline(query_text, retriever, groq_api_key, chat_history):
+    # print(chat_history)
     llm = create_model(groq_api_key)
     if not is_relevant(query_text, llm):
         response = unable_to_answer(query_text, llm)
