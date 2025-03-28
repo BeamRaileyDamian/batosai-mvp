@@ -25,13 +25,14 @@ def apply_styles():
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 10px;
+            color: #e0e0e0; /* Lighter text for green board */
         }
         .quiz-answer {
             font-size: 18px;
-            color: #4b644c;
+            color: white;
             margin-bottom: 20px;
             padding: 10px;
-            background-color: #f0f8ff;
+            background-color: #567257;
             border-left: 4px solid #59B75B;
             border-radius: 5px;
         }
@@ -48,24 +49,26 @@ def apply_styles():
             border: 1px solid #284329 !important;
             box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
         }
-                
-        button {
-            width: 35% !important;
-            display: flex !important;
-            justify-content: flex-start !important;
-            text-align: left !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            background-color: #486f4f !important;
-            color: white !important;
-            border-radius: 8px !important;
-            padding: 10px 15px !important;
-            border: 1px solid #284329 !important;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
+        
+        .green-board {
+            background-color: #4b644c;
+            background-size: 30px 30px;
+            border-radius: 10px;
+            padding: 20px;
+            color: #e0e0e0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            min-height: 400px;
+        }
+        
+        .green-board h2 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
         }
         </style>
     """, unsafe_allow_html=True)
+
+
 
 def get_quote():
     try:
@@ -167,11 +170,15 @@ def main():
         # Use placeholders for the notes review content so we can clear them later
         with col1:
             notes_header_placeholder = st.empty()
-            quote_placeholder = st.empty()
             
             # Fill the placeholders with content
-            notes_header_placeholder.header("Review your notes in preparation for a quiz! 🧠")
-            quote_placeholder.subheader(quote)
+            notes_content = f'''
+            <div class="green-board">
+                <h2>Review your notes in preparation for a quiz! 🧠</h2>
+                <div style="color: #e0e0e0; text-align: center; font-weight: bold; font-size: 25px; margin-top: 20px;">{quote}</div>
+            </div>
+            '''
+            notes_header_placeholder.markdown(notes_content, unsafe_allow_html=True)
 
         with col2:
             timer_placeholder = st.empty()
@@ -192,7 +199,6 @@ def main():
         transcript_placeholder.empty()
         timer_placeholder.empty()
         notes_header_placeholder.empty()
-        quote_placeholder.empty()
         
         ################# QUIZ ############################
         st.session_state.countdown = 3
@@ -200,16 +206,15 @@ def main():
         # Create placeholders for quiz content
         with col1:
             quiz_header_placeholder = st.empty()
-            quiz_content_placeholder = st.empty()
             
-            # Display quiz header and questions
-            quiz_header_placeholder.header("Quiz Time! 📝")
-            
-            quiz_content = ""
-            for i in range(len(st.session_state.lect_script["quiz"])):
-                quiz_content += f'<div class="quiz-question">{i+1}. {st.session_state.lect_script["quiz"][i]["question"]}</div>'
-            
-            quiz_content_placeholder.markdown(quiz_content, unsafe_allow_html=True)
+            # Combine header and questions in a single green board div
+            quiz_content = f'''
+            <div class="green-board">
+                <h2>Quiz Time! 📝</h2>
+                {"".join(f'<div class="quiz-question">{i+1}. {st.session_state.lect_script["quiz"][i]["question"]}</div>' for i in range(len(st.session_state.lect_script["quiz"])))}
+            </div>
+            '''
+            quiz_header_placeholder.markdown(quiz_content, unsafe_allow_html=True)
 
         with col2:
             timer_placeholder = st.empty()
@@ -230,22 +235,20 @@ def main():
         ################# QUIZ ANSWERS ############################
         # Clear quiz content
         quiz_header_placeholder.empty()
-        quiz_content_placeholder.empty()
         st.session_state.curr_slide = 0
         st.session_state.countdown = 3
         
         with col1:
             answers_header_placeholder = st.empty()
-            answers_content_placeholder = st.empty()
             
-            answers_header_placeholder.header("Quiz Answers 🎓")
-            
-            answers_content = ""
-            for i in range(len(st.session_state.lect_script["quiz"])):
-                answers_content += f'<div class="quiz-question">{i+1}. {st.session_state.lect_script["quiz"][i]["question"]}</div>'
-                answers_content += f'<div class="quiz-answer">{st.session_state.lect_script["quiz"][i]["answer"]}</div>'
-            
-            answers_content_placeholder.markdown(answers_content, unsafe_allow_html=True)
+            # Combine header, questions, and answers in a single green board div
+            answers_content = f'''
+            <div class="green-board">
+                <h2>Quiz Answers 🎓</h2>
+                {"".join(f'<div class="quiz-question">{i+1}. {st.session_state.lect_script["quiz"][i]["question"]}</div><div class="quiz-answer">{st.session_state.lect_script["quiz"][i]["answer"]}</div>' for i in range(len(st.session_state.lect_script["quiz"])))}
+            </div>
+            '''
+            answers_header_placeholder.markdown(answers_content, unsafe_allow_html=True)
 
         with col2:
             with timer_placeholder: st.empty()
