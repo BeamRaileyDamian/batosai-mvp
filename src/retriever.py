@@ -81,7 +81,7 @@ def create_template():
 def is_relevant(query, llm):
     prompt = f"""
     You are an intelligent tutor for a course on Operating Systems.
-    Your task is to determine whether the given question is relevant to the subject and if it is academic in nature and not asking for the answer to an exam or quiz question.
+    Your task is to determine whether the given question is relevant to the subject OR if it is possibly a follow-up or clarifying question such as "again" or "make it simpler" and if it is academic in nature.
 
     Question: "{query}"
 
