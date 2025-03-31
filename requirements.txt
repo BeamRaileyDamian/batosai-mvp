@@ -4,12 +4,13 @@ pypdf
 pymupdf
 supabase
 streamlit
+pytesseract
 ffmpeg-python
 firebase_admin
 langchain_groq
 chromadb==0.5.3
 langchain_chroma
-pysqlite3-binary
+#pysqlite3-binary
 streamlit_lottie
 streamlit_js_eval
 langchain_community

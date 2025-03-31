@@ -2,7 +2,9 @@ import os
 import io
 import sys
 import uuid
-import pymupdf
+import fitz
+import pytesseract
+from PIL import Image
 import firebase_admin
 from gtts import gTTS
 from math import ceil
@@ -29,6 +31,86 @@ def post_template(content):
 
         Input to clean:
         - {content} 
+    """
+
+def few_shot_samples():
+    return f"""
+        Here are some few-shot samples for you to learn from.
+
+        Sample 1:
+            Actual Slide Content: 
+                What a happens when a program runs?
+                A running program executes instructions.
+                    1. The processor fetches an instruction from memory.
+                    2. Decode: Figure out which instruction this is
+                    3. Execute: i.e., add two numbers, access memory, check a condition, jump to function, and so forth.
+                    4. The processor moves on to the next instruction and so on (until completion).
+                This is the Von Neumann model of computing.
+            Script:
+                So, in this, let's take a look at what happens when a program runs. I'm sure everyone is familiar with these steps already because you have taken several CompSci courses already, but let's have a review.
+                So when a program runs, it executes instructions, and it is the processor that fetches the instruction from memory.
+                In the case of x86-64, which is the ISA that you studied in CompSci 131, we have a special register called the instruction pointer, which basically contains the address of the next instruction to be executed.
+                Now, once that instruction is fetched, it will be decoded to figure out which instruction this is and after it has determined the operation or instruction—so usually, you are given the code, right?—then your code will be decoded, and the particular specific instruction will be extracted and executed.
+                For example, if you have an ADD instruction or a MOVE instruction, these instructions are implemented at the hardware level. So, for example, if you have another instruction, at the circuit level, it will be implemented as a full adder, as you discussed in CompSci 130.
+                After the execution of this instruction, the next instruction will be fetched, and the process continues. This is called the von Neumann architecture, which is the model of computing that is being implemented in the computers that we have today.
+
+        Sample 2:
+            Actual Slide Content: 
+                Process API
+                These APIs are available on any modern OS
+                    - Create
+                        Create a new process to run a program: fork(), exec(), clone()
+                    - Destroy
+                        Halt a runaway process: kill(pid, SIGTERM)
+                    - Wait
+                        Wait for a process to stop running: wait(pid)
+                    - Miscellaneous Control
+                        Some kind of method to suspend a process and then resume it: kill(pid, SIGSTOP), kill(pid, SIGCONT)
+                    - Status
+                        Get some status info about a process: cat /proc/pid/status
+            Script:
+                Okay, so given that we now understand the concept of a process and the machine state that characterizes a process, let's look at the API (Application Programming Interface) related to processes.
+                An operating system should provide some APIs or system calls that allow a user to manipulate processes. These categories of APIs typically include functions for:
+                • Creating a process
+                • Destroying a process
+                • Waiting for a process to finish
+                • Miscellaneous control
+                • Status
+                The create API allows the creation of a new process to run a program. This usually happens when you double-click an icon in a graphical environment or type the name of an executable in the command prompt (or shell) and press Enter.
+                It's important to know that a user can access the operating system using either a Graphical User Interface (GUI) or a Command Line Interface (CLI). While most people are comfortable with a GUI, in CMSC 125, we would like you to become confident in using the command line interface (CLI) or terminal.
+                Going back to process-related functions in an operating system:
+                • For creating processes, Linux provides system calls like fork, exec, and clone.
+                • For destroying processes, we have system calls like kill.
+                • For waiting for a process to finish, we use wait.
+                • For miscellaneous control, the kill system call can also be used to terminate a process, temporarily suspend it, or resume its execution later.
+                The status API allows us to retrieve information about the process status, which I demonstrated earlier.
+                We will have a more detailed discussion on the actual operations of these system calls in the next chapter.
+
+        Sample 3:
+            Actual Slide Content:
+                Tracing Process States: CPU Only
+                o Assumes a single processor is available
+                Time Process0 Process1 Notes
+                1 Running Ready
+                2 Running Ready
+                3 Running Ready
+                4 Running Ready Process0 now done
+                5 - Running
+                6 - Running
+                7 - Running
+                8 - Running Process1 now done
+            Script:
+                Let's take a look at an example here: tracing process states.
+                The assumption here is that we have a single processor.
+                This is our notation: we have four columns—Time, Process 0, Process 1, and some notes. We have two processes and a timeline.
+                At time 1, Process 0 is running. Its state is "Running." Since we only have a single processor, Process 1 will be in the "Ready" state because we can only run one process at a time.
+                At time 2, Process 0 is still running.
+                At time 3, Process 0 is still running.
+                At time 4, Process 0 is now complete, meaning it has finished its task and is terminated.
+                Since Process 0 is done, we can now run the second process, Process 1.
+                At times 5, 6, 7, and 8, Process 1 runs until it is also completed.
+                This is how we represent the execution and transition of process states, assuming a single processor.
+                Also, in this example, there are no I/O operations—only CPU operations. So, these states refer specifically to execution on the CPU.
     """
 
 def first_slide_no_prev(curr, next, lect_personality):
@@ -79,7 +161,6 @@ def main_template(prev, curr, next, lect_personality):
         Context:
         - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
-        - The script should be at most 150 words.
         - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
         - {personality_prompt(lect_personality)}
 
@@ -97,6 +178,9 @@ def main_template(prev, curr, next, lect_personality):
         - Use analogies, examples, or comparisons where useful to simplify complex ideas.
         - Focus on fresh content while keeping continuity with the previous slide's script.
         - Focus on clarity and accessibility, assuming the student is encountering this material for the first time.
+
+        Few-Shot Samples:
+        {few_shot_samples()}
 
         Generate the script for the current slide based on these instructions.
     """
@@ -213,6 +297,21 @@ def quiz_gen(llm, pdf_content_str):
         print(e, response)
         return False
 
+def get_text_or_ocr(page):
+    text = page.get_text("text")
+        
+    if len(text.split()) < 30:
+        pix = page.get_pixmap(matrix=fitz.Matrix(2.0, 2.0))
+        
+        # Convert pixmap to PIL Image
+        img_data = pix.tobytes("png")
+        img = Image.open(io.BytesIO(img_data))
+        
+        text = pytesseract.image_to_string(img)
+        img.close()
+    
+    return text
+
 def lect_gen(file, filename, lect_title, lect_num, lect_personality):
     lect_script = []
     entire_pdf_content = []
@@ -243,11 +342,11 @@ def lect_gen(file, filename, lect_title, lect_num, lect_personality):
         prev_module_content = '\n'.join([i["script"] for i in first_doc.to_dict()["script"]])
 
     # Open the PDF file and generate the lecture scripts
-    doc = pymupdf.open(stream=file)
+    doc = fitz.open(stream=file)
     for i in range(len(doc)):
         prev_slide = "None"
         next_slide = "None"
-        current_slide = doc[i].get_text()
+        current_slide = get_text_or_ocr(doc[i])
         entire_pdf_content.append(f"{current_slide}\n----------------")
         if i > 0: prev_slide = lect_script[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()

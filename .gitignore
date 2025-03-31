@@ -7,3 +7,4 @@ data
 raw_data
 __pycache__
 experiments/
+standalone/
