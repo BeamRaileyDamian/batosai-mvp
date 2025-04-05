@@ -1,4 +1,5 @@
 CHROMA_PATH = "chroma/db"
+#LLM_MODEL = 'llama-3.1-8b-instant'
 # LLM_MODEL = 'llama-3.3-70b-versatile'
 LLM_MODEL = 'llama-3.3-70b-specdec'
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"

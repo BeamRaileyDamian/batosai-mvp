@@ -55,38 +55,6 @@ def few_shot_samples():
                 After the execution of this instruction, the next instruction will be fetched, and the process continues. This is called the von Neumann architecture, which is the model of computing that is being implemented in the computers that we have today.
 
         Sample 2:
-            Actual Slide Content: 
-                Process API
-                These APIs are available on any modern OS
-                    - Create
-                        Create a new process to run a program: fork(), exec(), clone()
-                    - Destroy
-                        Halt a runaway process: kill(pid, SIGTERM)
-                    - Wait
-                        Wait for a process to stop running: wait(pid)
-                    - Miscellaneous Control
-                        Some kind of method to suspend a process and then resume it: kill(pid, SIGSTOP), kill(pid, SIGCONT)
-                    - Status
-                        Get some status info about a process: cat /proc/pid/status
-            Script:
-                Okay, so given that we now understand the concept of a process and the machine state that characterizes a process, let's look at the API (Application Programming Interface) related to processes.
-                An operating system should provide some APIs or system calls that allow a user to manipulate processes. These categories of APIs typically include functions for:
-                • Creating a process
-                • Destroying a process
-                • Waiting for a process to finish
-                • Miscellaneous control
-                • Status
-                The create API allows the creation of a new process to run a program. This usually happens when you double-click an icon in a graphical environment or type the name of an executable in the command prompt (or shell) and press Enter.
-                It's important to know that a user can access the operating system using either a Graphical User Interface (GUI) or a Command Line Interface (CLI). While most people are comfortable with a GUI, in CMSC 125, we would like you to become confident in using the command line interface (CLI) or terminal.
-                Going back to process-related functions in an operating system:
-                • For creating processes, Linux provides system calls like fork, exec, and clone.
-                • For destroying processes, we have system calls like kill.
-                • For waiting for a process to finish, we use wait.
-                • For miscellaneous control, the kill system call can also be used to terminate a process, temporarily suspend it, or resume its execution later.
-                The status API allows us to retrieve information about the process status, which I demonstrated earlier.
-                We will have a more detailed discussion on the actual operations of these system calls in the next chapter.
-
-        Sample 3:
             Actual Slide Content:
                 Tracing Process States: CPU Only
                 o Assumes a single processor is available
@@ -167,21 +135,20 @@ def main_template(prev, curr, next, lect_personality):
         Slide Content:
         - Current Slide: {curr}
         - Full Script from Previous Slide: {prev}
-        - Next Slide: {next}
+        - Next Slide: {next if next else "This is the Final Slide."}
 
         Structure and Emphasis:
         1. Introduction: Briefly introduce the main idea of the current slide. 
         2. Explanation: Explain the slide content clearly.
-        3. Transition to Next Slide: Conclude with a statement or question that connects to the next slide's content.
+        3. Transition to Next Slide: Conclude with a short statement or question, at most one sentence, that connects to the next slide's content. If this is the final slide, wrap it up.
 
         Extra Instructions:
-        - Use analogies, examples, or comparisons where useful to simplify complex ideas.
-        - Focus on fresh content while keeping continuity with the previous slide's script.
+        - Use analogies, examples, or comparisons ONLY WHEN useful to simplify complex ideas.
         - Focus on clarity and accessibility, assuming the student is encountering this material for the first time.
 
         Few-Shot Samples:
         {few_shot_samples()}
-
+        
         Generate the script for the current slide based on these instructions.
     """
 
