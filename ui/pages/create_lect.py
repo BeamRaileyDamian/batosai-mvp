@@ -5,7 +5,7 @@ import streamlit as st
 from supabase import create_client, Client
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from src.lect_gen import lect_gen
+from src.lect_gen import *
 from src.embedder import create_embeddings
 
 def upload_to_supabase(file, storage_path, supabase_url, supabase_api_key, bucket_name, content_type):
@@ -65,42 +65,70 @@ def main():
             filename = uploaded_file.name
             file = uploaded_file.read()
 
-            publicUrl = lect_gen(file, filename, lect_title, lect_num, lect_personality)
-            if publicUrl: 
-                st.session_state.lect_ids.append(lect_title)
-                if lect_num:
-                    st.session_state.module_numbers[lect_title] = lect_num
-                sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
-            else: 
+            scripts, quiz = gen_script_and_quiz(file, lect_num, lect_personality)
+            if scripts and quiz:
+                st.session_state.generated_data = {
+                    "scripts": scripts,
+                    "quiz": quiz,
+                    "file": file,
+                    "filename": filename,
+                    "lect_title": lect_title,
+                    "lect_num": lect_num,
+                    "lect_personality": lect_personality
+                }
+                st.session_state.show_continue_button = True
+            else:
                 st.error("Lecture Creation Failed")
-                return
-
-            rag_pdfs = [file]
-            rag_pdfs_url = [publicUrl]
-            rag_pdfs_filenames = [filename]
-            if additional_files:
-                for f in additional_files:
-                    if f.name not in rag_pdfs_filenames:
-                        f.seek(0)
-                        file_content = f.read()
-                        bucket_storage_path = f"{bucket_folder_pdf}/{lect_title}/{f.name}"
-                        url = upload_to_supabase(file_content, bucket_storage_path, supabase_url, supabase_api_key, bucket_name, "application/pdf")
-                        
-                        rag_pdfs.append(file_content)
-                        rag_pdfs_filenames.append(f.name)
-                        rag_pdfs_url.append(url)
-
-            response_rag = create_embeddings(rag_pdfs, lect_title, rag_pdfs_filenames, rag_pdfs_url)
-
-            if publicUrl and response_rag:
-                st.success("Lecture Successully Created")
-
         elif not uploaded_file:
             st.error("PDF Presentation is Required")
         elif not lect_title:
             st.error("Lecture Title is Required")
         elif not lect_personality:
             st.error("Select at least one lecturer personality")
+
+    # Handle Continue button separately
+    if st.session_state.get("show_continue_button", False):
+        if st.button("Continue?"):
+            data = st.session_state.get("generated_data")
+            if data:
+                publicUrl = gen_audio_upload_pdf(
+                    data["scripts"], data["quiz"],
+                    data["file"], data["filename"],
+                    data["lect_title"], data["lect_num"]
+                )
+                if publicUrl:
+                    st.session_state.lect_ids.append(data["lect_title"])
+                    if data["lect_num"]:
+                        st.session_state.module_numbers[data["lect_title"]] = data["lect_num"]
+                    sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
+
+                    rag_pdfs = [data["file"]]
+                    rag_pdfs_url = [publicUrl]
+                    rag_pdfs_filenames = [data["filename"]]
+
+                    if additional_files:
+                        for f in additional_files:
+                            if f.name not in rag_pdfs_filenames:
+                                f.seek(0)
+                                file_content = f.read()
+                                bucket_storage_path = f"{bucket_folder_pdf}/{data['lect_title']}/{f.name}"
+                                url = upload_to_supabase(file_content, bucket_storage_path, supabase_url, supabase_api_key, bucket_name, "application/pdf")
+                                
+                                rag_pdfs.append(file_content)
+                                rag_pdfs_filenames.append(f.name)
+                                rag_pdfs_url.append(url)
+
+                    response_rag = create_embeddings(rag_pdfs, data["lect_title"], rag_pdfs_filenames, rag_pdfs_url)
+                    if response_rag:
+                        st.success("Lecture Successfully Created")
+                    else:
+                        st.error("Lecture Creation Failed")
+                else:
+                    st.error("Lecture Creation Failed")
+
+            # Reset continue state
+            st.session_state.show_continue_button = False
+            st.session_state.generated_data = None
 
 if __name__ == "__main__":
     main()

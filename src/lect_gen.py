@@ -135,7 +135,7 @@ def main_template(prev, curr, next, lect_personality):
         Slide Content:
         - Current Slide: {curr}
         - Full Script from Previous Slide: {prev}
-        - Next Slide: {next if next else "This is the Final Slide."}
+        - Next Slide: {next}
 
         Structure and Emphasis:
         1. Introduction: Briefly introduce the main idea of the current slide. 
@@ -145,9 +145,38 @@ def main_template(prev, curr, next, lect_personality):
         Extra Instructions:
         - Use analogies, examples, or comparisons ONLY WHEN useful to simplify complex ideas.
         - Focus on clarity and accessibility, assuming the student is encountering this material for the first time.
-
+        
         Few-Shot Samples:
         {few_shot_samples()}
+        
+        Generate the script for the current slide based on these instructions.
+    """
+
+def last_slide_template(prev, curr, entire_pdf_content, lect_personality):
+    return f"""
+        Context:
+        - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
+        - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
+        - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
+        - {personality_prompt(lect_personality)}
+
+        Slide Content:
+        - Current Slide: {curr}
+        - Full Script from Previous Slide: {prev}
+
+        Structure and Emphasis:
+        1. Introduction: Briefly introduce the main idea of the current slide. 
+        2. Explanation: Explain the slide content clearly.
+        3. Transition to Next Slide: Conclude with a short statement or question, at most one sentence, that connects to the next slide's content. If this is the final slide, wrap it up.
+
+        Extra Instructions:
+        - Use analogies, examples, or comparisons ONLY WHEN useful to simplify complex ideas.
+        - Focus on clarity and accessibility, assuming the student is encountering this material for the first time.
+        
+        Few-Shot Samples:
+        {few_shot_samples()}
+
+        This is the last slide. Wrap up the lesson at the end of the script. The whole lesson's content is shown here:\n{entire_pdf_content}
         
         Generate the script for the current slide based on these instructions.
     """
@@ -218,7 +247,27 @@ def script_gen_first_slide(llm, prev_lesson, current_slide, next_slide, lect_per
         print(e)
         return False
 
-def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
+def script_gen_last_slide(llm, prev_slide, current_slide, entire_pdf_content, lect_personality):
+    message = None
+    raw_response = None
+    message = last_slide_template(prev_slide, current_slide, entire_pdf_content, lect_personality)
+
+    try: 
+        raw_response = llm.invoke(message).content
+    except Exception as e:
+        print(e)
+        return False
+    
+    # postprocessing
+    try: 
+        post_message = post_template(raw_response)
+        response = llm.invoke(post_message).content
+        return response
+    except Exception as e:
+        print(e)
+        return False
+
+def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
     # Generate TTS audio
     tts = gTTS(text=text, lang=lang)
     fp = io.BytesIO()
@@ -233,6 +282,32 @@ def tts_and_upload(text, bucket_folder, lect_title, supabase_url, supabase_api_k
 
     public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
     return public_url, duration
+
+def shorter(llm, script):
+    prompt = f"""
+        Shorten the following passage that is explaining a lecture slide. Do not summarize it too much; just shorten it by a bit.
+
+        Passage: {script}
+    """
+
+    response = None
+    try: 
+        response = llm.invoke(prompt).content
+    except Exception as e:
+        print(e, response)
+        return False
+
+    # postprocessing
+    try: 
+        post_message = post_template(response)
+        cleaned_response = llm.invoke(post_message).content
+        if len(cleaned_response) > 2000:
+            return shorter(llm, cleaned_response)
+        else:
+            return cleaned_response
+    except Exception as e:
+        print(e)
+        return False
 
 def quiz_gen(llm, pdf_content_str):
     prompt = f'''
@@ -279,20 +354,14 @@ def get_text_or_ocr(page):
     
     return text
 
-def lect_gen(file, filename, lect_title, lect_num, lect_personality):
-    lect_script = []
+def gen_script_and_quiz(file, lect_num, lect_personality):
+    scripts = []
     entire_pdf_content = []
+    test_content = []
 
     # Load the LLM
     groq_api_key = st.secrets['GROQ_API_KEY']
     llm = create_model(groq_api_key)
-
-    # Initialize Supabase
-    supabase_url = st.secrets["SUPABASE_URL"]
-    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
-    bucket_name = st.secrets["BUCKET_NAME"]
-    bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
-    bucket_folder_audio = st.secrets["BUCKET_FOLDER_AUDIO"]
 
     # Initialize Firebase Firestore
     if not firebase_admin._apps:
@@ -311,21 +380,52 @@ def lect_gen(file, filename, lect_title, lect_num, lect_personality):
     # Open the PDF file and generate the lecture scripts
     doc = fitz.open(stream=file)
     for i in range(len(doc)):
-        prev_slide = "None"
-        next_slide = "None"
+        prev_slide = None
+        next_slide = None
         current_slide = get_text_or_ocr(doc[i])
         entire_pdf_content.append(f"{current_slide}\n----------------")
-        if i > 0: prev_slide = lect_script[i-1]
+        if i > 0: prev_slide = scripts[i-1]
         if i < len(doc) - 1: next_slide = doc[i+1].get_text()
 
         script = None
         if i == 0:
             script = script_gen_first_slide(llm, prev_module_content, current_slide, next_slide, lect_personality)
+        elif i == len(doc) - 1:
+            script = script_gen_last_slide(llm, prev_module_content, current_slide, entire_pdf_content, lect_personality)
         else:
             script = script_gen(llm, prev_slide, current_slide, next_slide, lect_personality)
-        if not script: return False
 
-        public_url_audio, duration = tts_and_upload(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        if not script: return False
+        if len(script) > 2000:
+            script = shorter(llm, script)
+        test_content.append(f"Slide {i+1}:\n{script}\n----------------")
+        scripts.append(script)
+        print(len(script))
+    
+    with open("script_generated.txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(test_content))
+
+    # generate 5-item quiz
+    quiz = quiz_gen(llm, '\n'.join(entire_pdf_content))
+    return scripts, quiz
+
+def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
+    # Initialize Supabase
+    supabase_url = st.secrets["SUPABASE_URL"]
+    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
+    bucket_name = st.secrets["BUCKET_NAME"]
+    bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
+    bucket_folder_audio = st.secrets["BUCKET_FOLDER_AUDIO"]
+    lect_script = []
+
+    # Initialize Firebase Firestore
+    if not firebase_admin._apps:
+        cred = st.secrets["firebase"]["proj_settings"]
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+
+    for script in scripts:
+        public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
         if not public_url_audio: return False
 
         lect_script.append({
@@ -333,20 +433,13 @@ def lect_gen(file, filename, lect_title, lect_num, lect_personality):
             "audio": public_url_audio,
             "duration": duration
         })
-        #break ######################
-
-    # for i in range(len(doc)):
-    #     current_slide = doc[i].get_text()
-    #     entire_pdf_content.append(f"{current_slide}\n----------------")
 
     # Upload PDF file
     bucket_storage_path = f"{bucket_folder_pdf}/{lect_title}/{filename}"
     publicUrl = upload_to_supabase(file, bucket_storage_path, supabase_url, supabase_api_key, bucket_name, "application/pdf")
     if not publicUrl: return False
 
-    # generate 5-item quiz
-    quiz = quiz_gen(llm, '\n'.join(entire_pdf_content))
-
+    doc = fitz.open(stream=file)
     # Upload lecture script
     lecture = {
         "title": lect_title,
@@ -364,6 +457,3 @@ def lect_gen(file, filename, lect_title, lect_num, lect_personality):
     except Exception as e:
         print(e)
         return False
-
-if __name__ == "__main__":
-    lect_gen()

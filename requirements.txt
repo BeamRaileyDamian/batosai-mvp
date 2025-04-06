@@ -1,9 +1,11 @@
 gtts
 pydub
 pypdf
+torch
 pymupdf
 supabase
 streamlit
+elevenlabs
 pytesseract
 ffmpeg-python
 firebase_admin

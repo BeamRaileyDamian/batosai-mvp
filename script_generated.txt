@@ -1,0 +1,167 @@
+Slide 1:
+Hello everyone, welcome to today's lecture on Operating System Three Easy Pieces. We're now diving into the fourth section, The Abstraction The Process. In this part of our journey, we'll be exploring how operating systems create an environment that allows multiple programs to run smoothly, even when resources are limited. Let's take a look at how this abstraction works in practice, starting with a fundamental challenge: providing the illusion of many CPUs when we only have a few. Our next slide will delve into this concept, specifically how CPU virtualization and time-sharing come into play to make this illusion a reality.
+----------------
+Slide 2:
+Let's take a look at how operating systems provide the illusion of many CPUs when we only have a limited number, for example, 8 cores. Users want to run many programs but we only have a limited number of CPUs. This is a fundamental challenge because users often want to multitask, running multiple programs simultaneously.
+
+To address this, we use something called CPU virtualization. The OS can promote the illusion that many virtual CPUs exist. But how does it do this. Essentially, it's by juggling programs. This is achieved through a technique called time-sharing, where the OS runs one process, then stops it and runs another. This creates the illusion that multiple processes are running concurrently, even though we only have a limited number of physical CPUs.
+
+The potential cost of this approach is performance, as the OS has to constantly switch between processes. This is done via a mechanism called context-switch, which allows the OS to save the state of one process and load the state of another. Its a bit like a juggler switching between balls, except instead of balls, the OS is switching between processes.
+
+As we explore this concept further, well need to consider the underlying mechanisms and policies that make this possible, so lets move on to the next topic, what are the mechanisms and policies that enable this functionality
+----------------
+Slide 3:
+Let's take a look at the current slide, which is about mechanisms and policies. Operating systems provide the illusion of many CPUs when we only have a limited number, and this is achieved through CPU virtualization and time-sharing. To make this possible, we need to consider the underlying mechanisms and policies that enable this functionality.
+
+We have Mechanism and Policy. A mechanism is defined as low-level methods or protocols that implement a functionality, and it's essentially answering the question how. For example, context-switch is a mechanism that allows the OS to save the state of one process and load the state of another.
+
+On the other hand, a policy is an algorithm for making some kinds of decision within the OS, and it's answering the question which. For instance, a scheduling policy decides which program to run first or next. These policies and mechanisms work together to enable the OS to manage multiple processes and provide the illusion of concurrent execution.
+
+Now that we've explored the concepts of mechanisms and policies, let's think about what actually comprises a process, and how the OS manages the execution of programs.
+----------------
+Slide 4:
+Let's take a look at the current slide, which is about a process. As we've explored the concepts of mechanisms and policies, it's essential to understand what actually comprises a process and how the OS manages the execution of programs.
+
+A program itself is lifeless – it just sits on the disk as a bunch of instructions and some data, also known as a program image. To bring it to life, we need to create a process. We can characterize a process by looking at the different data structures and systems resources it uses or accesses.
+
+What comprises a process. A process is made up of several key components. The machine state, which includes memory, registers, and I/O information, is a crucial part of a process. 
+
+The memory or address space refers to the range of addresses that a process can access. This includes the instructions or code, data, and other information that the process needs to run. 
+
+Registers provide high-speed storage for small data items. You may have heard of registers like EAX, EBX. Specifically, we have the program counter, also known as the instruction pointer, which keeps track of the next instruction to be executed. We also have the stack pointer and the frame or base pointer, which help manage the process's memory.
+
+A process also includes I/O information, such as a list of open files. This allows the process to interact with the outside world, whether it's reading from a file or writing to the screen.
+
+A process is a running program. It's the living, breathing entity that's executing instructions and interacting with the system. 
+
+Now that we've explored what makes up a process, let's think about how we can create, manage, and control these processes, which is exactly what we'll be discussing on the next slide.
+----------------
+Slide 5:
+Let's take a look at the current slide, which is about the Process API. As we've explored what comprises a process, it's essential to understand how we can create, manage, and control these processes.
+
+The Process API provides a set of functions that allow us to interact with processes. These APIs are available on any modern OS, and they enable us to perform various operations on processes.
+
+Let's go through some of the key functions available in the Process API. We have Create, which allows us to create a new process to run a program. This can be done using functions such as fork, exec, and clone.
+
+We also have Destroy, which enables us to halt a runaway process. This can be achieved using the kill function, where we specify the process ID and the signal to be sent, such as SIGTERM.
+
+Another important function is Wait, which allows us to wait for a process to stop running. We can use the wait function and specify the process ID to wait for its completion.
+
+In addition to these functions, we have Miscellaneous Control, which provides methods to suspend a process and then resume it. This can be done using the kill function with signals such as SIGSTOP and SIGCONT.
+
+Finally, we have Status, which enables us to get some status information about a process. For example, we can use the command cat proc pid status to retrieve information about a process with a specific ID.
+
+Now that we've explored the Process API, let's think about how these functions are used in the process creation, which is exactly what we'll be discussing on the next slide.
+----------------
+Slide 6:
+Let's take a look at the current slide, which is about Process Creation. As we've explored the Process API in the previous slide, it's essential to understand how these processes are created.
+
+The process creation involves several steps. The first step is to load a program code, along with static data, into memory, into the address space of the process. Programs initially reside on disk in executable format, such as ELF or PE. The operating system performs this loading process lazily, meaning it loads pieces of code or data only as they are needed during program execution. This is particularly useful for large programs, as it helps to conserve memory.
+
+The next step is the allocation of the program's run-time stack. The stack is used for local variables, function parameters, and return addresses. The stack is initialized with arguments, specifically argc and the argv array of the main function. This is where the program starts executing, and the stack plays a crucial role in managing the program's memory.
+
+Now that we've covered the initial steps of process creation, let's see how the process is further set up and executed on the next slide.
+----------------
+Slide 7:
+Let's take a look at the current slide, which continues our discussion on Process Creation. As we've explored the initial steps of process creation, we now dive deeper into the remaining steps.
+
+According to the slide, the next step is 3. The program’s heap is created usually done lazily. The heap is used for explicitly requested dynamically allocated data. This means that when a program needs to allocate memory dynamically, it can do so by calling functions like malloc and later free that memory by calling free. This dynamic allocation is crucial for programs that require memory to be allocated or deallocated during runtime.
+
+Moving on, the slide also mentions that 4. The OS does some other initialization tasks. This includes setting up input/output or I/O operations. By default, each process has three open file descriptors standard input, standard output, and standard error, which are represented by the numbers 0, 1, and 2, respectively. These file descriptors are essential for processes to interact with the outside world, such as reading input from the keyboard or writing output to the screen.
+
+Finally, the slide states that 5. Start the program running at the entry point, namely main. This is where the program actually begins execution. The operating system transfers control of the CPU to the newly-created process, allowing it to start running from the main function. This is the point where the program starts executing its instructions, and the process is now fully created and running.
+
+As we've covered the key steps in process creation, let's see how a program is loaded into memory and becomes a running process on the next slide.
+----------------
+Slide 8:
+Let's take a look at the current slide, which discusses the concept of loading a program into memory to become a running process. As we can see from the slide, we have several components involved in this process: code, static data, heap, stack, and the program itself, which resides on disk.
+
+The loading process takes the on-disk program and reads it into the address space of a process. This is a crucial step in transforming a program into a running process. The CPU plays a key role in this process, as it's responsible for executing the instructions that are loaded into memory.
+
+To break it down further, when a program is loaded, its code and static data are brought into memory. The heap and stack are also created, which are essential for dynamic memory allocation and storing local variables, function calls, and other data.
+
+The key point here is that loading a program involves transferring the program's code and data from disk into memory, where the CPU can access and execute it. This is a fundamental concept in operating systems, as it enables programs to run and perform tasks.
+
+As we've explored how a program is loaded into memory, we can now consider what happens to a process once it's running; what states can it be in, and how does it interact with the operating system?
+----------------
+Slide 9:
+Let's take a look at the current slide, which discusses the concept of process states. As we can see from the slide, A process can be in one of three states. These states are Running, Ready, and Blocked.
+
+When a process is Running, it means that the process is currently being executed by the processor. The processor is fetching and executing the instructions of the process.
+
+On the other hand, when a process is Ready, its ready to run, but for some reason, the operating system has chosen not to run it at this given moment. This could be due to various reasons such as the processor being busy with another process or the process not having the necessary resources to run.
+
+The third state is Blocked. A process becomes blocked when it has performed some kind of operation and is waiting for the result. For example, when a process initiates an I/O request to a disk, it becomes blocked and thus some other process can use the processor. This allows the operating system to efficiently manage the processor and other system resources.
+
+Additionally, the slide mentions that Additional states may be present depending on the OS, such as Initial and Final/Terminated. These states may vary depending on the specific operating system being used.
+
+Now that weve explored the different states a process can be in, lets consider how these states change over time, and what triggers these transitions.
+----------------
+Slide 10:
+Let's take a look at the current slide, which discusses the concept of process state transitions. As we can see from the slide, it's decided by the scheduler module of the OS. We have three main states: Ready, Scheduled, and Blocked.
+
+The scheduler module is responsible for managing these transitions. For instance, when a process is Scheduled, it means the process is currently being executed by the processor. On the other hand, when a process is Ready, it's ready to run, but the operating system has chosen not to run it at this given moment.
+
+Now, let's consider the transition from Scheduled to Descheduled. This happens when the scheduler decides to stop the execution of the current process, usually to give another process a chance to run.
+
+Additionally, when a process initiates an I/O operation, it becomes Blocked, waiting for the result. Once the I/O operation is complete, the process can transition back to the Ready state.
+
+As we can see, these transitions are crucial for the operating system to efficiently manage the processor and other system resources. Now that we've explored how these states change over time, let's consider how we can trace the states of processes in a system with a single processor.
+----------------
+Slide 11:
+Let's take a look at the current slide, which discusses tracing process states with a single processor. As we can see from the slide, it assumes that only one processor is available. We have a table here that outlines the states of two processes, Process0 and Process1, over time.
+
+The table has four columns Time Process0 Process1 and Notes. Lets go through this table step by step. At time 1 Process0 is Running and Process1 is Ready. This makes sense because with only one processor only one process can run at a time and the other has to wait in the Ready state.
+
+As we move to times 2 and 3 Process0 is still Running and Process1 remains Ready. At time 4 Process0 is still Running but now its noted that Process0 is now done. This means Process0 has completed its execution.
+
+After Process0 is done at times 5 6 7 and 8 Process1 takes over and starts Running. It continues to run until its also completed as noted at time 8.
+
+This example illustrates how process states change over time in a system with a single processor focusing only on CPU operations without any I/O operations involved. Now lets consider how the presence of I/O operations might affect these process states.
+----------------
+Slide 12:
+Let's take a look at the current slide, which discusses tracing process states with a single processor and I/O operations. As we can see from the slide, it assumes that only one processor is available. We have a table here that outlines the states of two processes, Process 0 and Process 1, over time.
+
+The table has four columns - Time, Process 0, Process 1, and Notes. At time 1, Process 0 is Running and Process 1 is Ready. This makes sense because with only one processor, only one process can run at a time and the other has to wait in the Ready state.
+
+As we move to times 2 and 3, Process 0 is still Running and Process 1 remains Ready. At time 4, Process 0 initiates an I/O operation, which means it needs to perform some input/output task, such as reading from a disk or writing to a file. As a result, Process 0 becomes Blocked, meaning it cannot continue running until the I/O operation is complete.
+
+At times 5 and 6, Process 1 takes over and starts Running, while Process 0 remains Blocked. This is because the processor can only run one process at a time, and since Process 0 is waiting for its I/O operation to finish, Process 1 can use the processor instead.
+
+At time 7, the I/O operation for Process 0 is complete, so it becomes Ready again. However, Process 1 is still Running, so Process 0 has to wait. Finally, at time 8, Process 1 is done, and then at time 9, Process 0 gets to run again and finishes its execution at time 10.
+
+This example illustrates how process states change over time in a system with a single processor, including the effects of I/O operations. Now, let's consider how the operating system keeps track of all this information, which leads us to the next topic - the key data structures used by the OS.
+----------------
+Slide 13:
+Let's take a look at the current slide, which discusses the key data structures used by the operating system to track various pieces of information. As we can see from the slide, it mentions that The OS has some key data structures that track various relevant pieces of information.
+
+These data structures are crucial for the operating system to manage processes efficiently. The slide lists a few examples, including Process/Tasks lists, which include Ready processes, Blocked processes, and the Currently running process.
+
+Think of it like a to-do list for the operating system. It needs to keep track of which processes are ready to run, which ones are blocked and waiting for something to happen, and which one is currently using the CPU.
+
+Another important data structure is the Register context, which holds the values of the registers when a process is stopped or paused. This is like taking a snapshot of the process's current state, so that when it's time to resume, the operating system can restore the process to its previous state.
+
+The slide also mentions the Process Control Block (PCB)/ Task Structure, which is a C-structure that contains information about a process. This is like a file folder that contains all the relevant information about a process, such as its current state, memory usage, and other details.
+
+Now, let's take a closer look at how these data structures are actually implemented in a real operating system, which leads us to the next topic.
+----------------
+Slide 14:
+Let's take a look at the current slide, which discusses the xv6 kernel's register context structure and process states definitions. As we can see from the slide, it mentions the struct context which holds the values of the registers when a process is stopped or paused.
+
+The struct context includes several important registers such as eip, the instruction pointer register, esp, the stack pointer register, ebx, the base register, ecx, the counter register, edx, the data register, esi, the source index register, edi, the destination index register, and ebp, the stack base pointer register. These registers are crucial for the operating system to save and restore the state of a process when it's stopped and subsequently restarted.
+
+In addition to the struct context, the slide also defines the different states a process can be in, which are represented by the enum proc state. The possible states are UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, and ZOMBIE. These states help the operating system manage the lifecycle of a process, from creation to termination.
+
+Now that we've seen how the xv6 kernel represents the register context and process states, let's take a look at how these concepts are used in the actual implementation of the operating system, specifically in the struct proc definition, which we'll explore in the next slide.
+----------------
+Slide 15:
+Let's examine the xv6 kernel proc structure definition, a crucial data structure in the xv6 operating system that tracks information about each process. The struct proc contains several fields, including char mem and uint sz, which represent the start and size of the process memory, respectively. These fields are essential for managing memory allocated to each process.
+
+The struct proc also includes char kstack, which points to the kernel stack for this process, and enum proc_state state, which stores the current state of the process, such as running, ready, or blocked. Other fields include int pid, which stores the process ID, and struct proc parent, which points to the parent process.
+
+Additionally, the struct proc contains fields like void chan, used when a process is sleeping on a channel, and int killed, which indicates whether the process has been killed. The struct file ofile field stores an array of open files, and struct inode cwd stores the current working directory. The struct context context field stores the register context of the process, used during context switches.
+
+The struct proc also includes struct trapframe tf, which stores the trap frame for the current interrupt, used to handle interrupts and exceptions during process execution. This comprehensive data structure stores all necessary information about a process, including its memory, state, and other relevant details, which the operating system uses to manage processes and provide services to them.
+
+As we conclude this lesson, let's recap the key concepts we've covered, from process abstraction to the mechanisms and policies governing process management, and the supporting data structures.
+----------------
