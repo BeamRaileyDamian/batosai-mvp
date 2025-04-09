@@ -1,3 +1,4 @@
+import base64
 import os
 import io
 import sys
@@ -10,6 +11,7 @@ from gtts import gTTS
 from math import ceil
 import streamlit as st
 from json import loads
+from speechify import Speechify
 from langchain_groq import ChatGroq
 from firebase_admin import firestore
 from pydub import AudioSegment, effects
@@ -267,6 +269,27 @@ def script_gen_last_slide(llm, prev_slide, current_slide, entire_pdf_content, le
         print(e)
         return False
 
+def tts_with_speechify(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name):
+    client = Speechify(
+        token=st.secrets["SPEECHIFY_API_KEY"],
+    )
+    response = client.tts.audio.speech(
+        input=text,
+        voice_id=st.secrets["SPEECHIFY_VOICE_ID"],
+        audio_format="mp3"
+    )
+
+    audio = response.audio_data
+    audio_bytes = base64.b64decode(audio)
+    filename = f"{uuid.uuid4()}.mp3"
+
+    audio_fp = io.BytesIO(audio_bytes)
+    audio_segment = AudioSegment.from_file(audio_fp, format="mp3")
+    duration = ceil(audio_segment.duration_seconds)
+
+    public_url = upload_to_supabase(audio_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
+    return public_url, duration
+
 def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
     # Generate TTS audio
     tts = gTTS(text=text, lang=lang)
@@ -425,7 +448,8 @@ def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
     db = firestore.client()
 
     for script in scripts:
-        public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        #public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
         if not public_url_audio: return False
 
         lect_script.append({
