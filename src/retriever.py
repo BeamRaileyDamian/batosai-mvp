@@ -1,8 +1,9 @@
 import os
 import sys
 import requests
-from langchain_chroma import Chroma
+import chromadb
 import streamlit as st
+from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -14,8 +15,12 @@ from lect_gen import create_model
 from embedder import get_embedding_function
 
 def create_retriever(collection_name):
-    vectorstore = Chroma(persist_directory=CHROMA_PATH, 
-                        embedding_function=get_embedding_function())
+    client = chromadb.HttpClient(
+        host=st.secrets["AWS_IP_ADDR"],
+        port=8000
+    )
+    vectorstore = Chroma(client=client,
+                         embedding_function=get_embedding_function())
     if collection_name == "General":
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
     else:

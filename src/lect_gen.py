@@ -448,8 +448,8 @@ def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
     db = firestore.client()
 
     for script in scripts:
-        #public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
-        public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        #public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
         if not public_url_audio: return False
 
         lect_script.append({
