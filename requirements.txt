@@ -7,6 +7,7 @@ supabase
 streamlit
 elevenlabs
 pytesseract
+python-dotenv
 ffmpeg-python
 speechify-api
 firebase_admin

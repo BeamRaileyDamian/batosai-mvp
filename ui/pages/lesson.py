@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import base64
@@ -99,7 +100,7 @@ def main():
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 10
 
-    avatar_url = requests.get(st.secrets["GIF"]) 
+    avatar_url = requests.get(os.environ.get("GIF")) 
     avatar_url_json = dict() 
     if avatar_url.status_code == 200: avatar_url_json = avatar_url.json() 
     else: print("Error in the URL") 

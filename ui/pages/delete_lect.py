@@ -46,13 +46,13 @@ def main():
     button_styles()
 
     # Initialize Supabase client
-    SUPABASE_URL = st.secrets["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["SUPABASE_API_KEY"]
+    SUPABASE_URL = os.environ.get("SUPABASE_URL")
+    SUPABASE_KEY = os.environ.get("SUPABASE_API_KEY")
     client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
     # Define bucket name and folder to delete
-    bucket_name = st.secrets["BUCKET_NAME"]
-    folder_name = st.secrets["BUCKET_FOLDER_PDF"]
+    bucket_name = os.environ.get("BUCKET_NAME")
+    folder_name = os.environ.get("BUCKET_FOLDER_PDF")
 
     if st.session_state.lect_ids:
         for id in st.session_state.lect_ids:

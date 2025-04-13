@@ -61,7 +61,7 @@ def split_documents(documents: list[Document]):
 
 def add_to_chroma(chunks: list[Document]):
     # client = chromadb.HttpClient(
-    #     host=st.secrets["AWS_IP_ADDR"],
+    #     host=os.environ.get("AWS_IP_ADDR"],
     #     port=8000
     # )
     # db = Chroma(embedding_function=get_embedding_function(), client=client)

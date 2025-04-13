@@ -1,10 +1,11 @@
+import os
 import chromadb
 import streamlit as st
 from config import *
 
 def chromadbClient():
     chroma_client = chromadb.HttpClient(
-        host=st.secrets["AWS_IP_ADDR"],
+        host=os.environ.get("AWS_IP_ADDR"),
         port=8000
     )
     chroma_client.heartbeat()
