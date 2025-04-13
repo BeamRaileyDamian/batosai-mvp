@@ -15,11 +15,13 @@ from lect_gen import create_model
 from embedder import get_embedding_function
 
 def create_retriever(collection_name):
-    client = chromadb.HttpClient(
-        host=st.secrets["AWS_IP_ADDR"],
-        port=8000
-    )
-    vectorstore = Chroma(client=client,
+    # client = chromadb.HttpClient(
+    #     host=st.secrets["AWS_IP_ADDR"],
+    #     port=8000
+    # )
+    # vectorstore = Chroma(client=client,
+    #                      embedding_function=get_embedding_function())
+    vectorstore = Chroma(persist_directory=CHROMA_PATH,
                          embedding_function=get_embedding_function())
     if collection_name == "General":
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})

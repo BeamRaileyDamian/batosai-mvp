@@ -60,11 +60,12 @@ def split_documents(documents: list[Document]):
     return text_splitter.split_documents(documents)
 
 def add_to_chroma(chunks: list[Document]):
-    client = chromadb.HttpClient(
-        host=st.secrets["AWS_IP_ADDR"],
-        port=8000
-    )
-    db = Chroma(embedding_function=get_embedding_function(), client=client)
+    # client = chromadb.HttpClient(
+    #     host=st.secrets["AWS_IP_ADDR"],
+    #     port=8000
+    # )
+    # db = Chroma(embedding_function=get_embedding_function(), client=client)
+    db = Chroma(embedding_function=get_embedding_function(), persist_directory=CHROMA_PATH)
 
     # Calculate Page IDs.
     chunks_with_ids = calculate_chunk_ids(chunks)

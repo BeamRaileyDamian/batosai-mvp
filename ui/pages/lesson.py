@@ -97,7 +97,7 @@ def main():
     response = requests.get(url)
 
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
-    if "countdown" not in st.session_state: st.session_state.countdown = 3
+    if "countdown" not in st.session_state: st.session_state.countdown = 10
 
     avatar_url = requests.get(st.secrets["GIF"]) 
     avatar_url_json = dict() 
@@ -201,7 +201,7 @@ def main():
         notes_header_placeholder.empty()
         
         ################# QUIZ ############################
-        st.session_state.countdown = 3
+        st.session_state.countdown = 10
         
         # Create placeholders for quiz content
         with col1:
@@ -236,7 +236,7 @@ def main():
         # Clear quiz content
         quiz_header_placeholder.empty()
         st.session_state.curr_slide = 0
-        st.session_state.countdown = 3
+        st.session_state.countdown = 10
         
         with col1:
             answers_header_placeholder = st.empty()

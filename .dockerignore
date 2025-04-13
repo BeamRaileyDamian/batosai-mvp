@@ -1,0 +1,31 @@
+# Ignore environment files (e.g., .env, .local config files)
+.env
+*.env
+*.local
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore log files
+*.log
+
+# Ignore Docker and Kubernetes files
+docker-compose.override.yml
+docker-compose.yml
+
+# Ignore database files
+*.db
+*.sqlite
+
+# Ignore test output (if you have tests)
+*.test
+*.coverage
+
+# Ignore hidden system files that aren't needed
+.DS_Store
+Thumbs.db
+
+# Ignore any other files not needed for the container
+.git
+.gitignore
