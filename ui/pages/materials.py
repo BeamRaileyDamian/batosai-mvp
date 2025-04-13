@@ -126,7 +126,7 @@ def main():
                     file_name="CMSC_125_Materials.zip",
                     mime="application/zip",
                     key="download-zip",
-                    icon=":material/download:",
+                    icon="⬇️",
                     on_click=mark_download_initiated
                 )
 

@@ -20,4 +20,5 @@ streamlit_js_eval
 langchain_community
 streamlit-pdf-viewer
 langchain_huggingface
+huggingface_hub[hf_xet]
 streamlit-authenticator

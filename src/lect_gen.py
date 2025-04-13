@@ -423,7 +423,6 @@ def gen_script_and_quiz(file, lect_num, lect_personality):
             script = shorter(llm, script)
         test_content.append(f"Slide {i+1}:\n{script}\n----------------")
         scripts.append(script)
-        print(len(script))
     
     with open("script_generated.txt", "w", encoding="utf-8") as f:
             f.write("\n".join(test_content))
