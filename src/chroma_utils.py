@@ -1,14 +1,21 @@
 import os
 import chromadb
-import streamlit as st
 from config import *
+from dotenv import load_dotenv
+from chromadb.config import Settings
 
 def chromadbClient():
+    load_dotenv(dotenv_path=".env", override=True)
     chroma_client = chromadb.HttpClient(
+        settings=Settings(
+            chroma_api_impl="rest",
+            chroma_server_host=os.environ.get("AWS_IP_ADDR"),
+            chroma_server_http_port="8000"
+        ),
         host=os.environ.get("AWS_IP_ADDR"),
         port=8000
     )
-    chroma_client.heartbeat()
+    print(chroma_client.heartbeat())
     return chroma_client
 
 def listCollections(client):
@@ -31,16 +38,9 @@ def deleteCollection(client, collectionName):
 
 def main():
     client = chromadbClient()
-    
-    # # List all collections
-    # # List all collections
-    # collections = listCollections(client)
-    # print("Collections:")
-    # for collection in collections:
-    #     print(f" - {collection.name}")
-
-    # print(len(listDocuments(client, "azojt2024_main")))
-
+    collections = listCollections(client)
+    print(collections)
+    print(len(listDocuments(client, "langchain")))
 
 if __name__ == "__main__":
     main()

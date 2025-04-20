@@ -1,12 +1,12 @@
 import os
 import sys
+import chromadb
 from utils import *
 import streamlit as st
 from supabase import create_client
-from langchain_chroma import Chroma
+from chromadb.config import Settings
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from src.embedder import get_embedding_function
 from src.config import *
 
 def delete_from_firebase(db, collection_name, document_id):
@@ -62,8 +62,17 @@ def main():
                 result = delete_from_firebase(st.session_state.db, "lect_scripts", id)
                 result2 = delete_supabase_folder(client, bucket_name, f"{folder_name}/{id}/")
 
-                chroma_db = Chroma(persist_directory=CHROMA_PATH, embedding_function=get_embedding_function())
-                chroma_db.delete(where={"lesson_id": id})
+                client = chromadb.HttpClient(
+                    settings=Settings(
+                        chroma_api_impl="rest",
+                        chroma_server_host=os.environ.get("AWS_IP_ADDR"),
+                        chroma_server_http_port="8000"
+                    ),
+                    host=os.environ.get("AWS_IP_ADDR"),
+                    port=8000
+                )
+                collection = client.get_or_create_collection(name=COLLECTION_NAME)
+                collection.delete(where={"lesson_id": id})
                 
                 if result and result2:
                     st.session_state.lect_ids.remove(id)

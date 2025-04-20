@@ -4,6 +4,7 @@ import tempfile
 import chromadb
 import streamlit as st
 from langchain_chroma import Chroma
+from chromadb.config import Settings
 from langchain.schema.document import Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -60,12 +61,16 @@ def split_documents(documents: list[Document]):
     return text_splitter.split_documents(documents)
 
 def add_to_chroma(chunks: list[Document]):
-    # client = chromadb.HttpClient(
-    #     host=os.environ.get("AWS_IP_ADDR"],
-    #     port=8000
-    # )
-    # db = Chroma(embedding_function=get_embedding_function(), client=client)
-    db = Chroma(embedding_function=get_embedding_function(), persist_directory=CHROMA_PATH)
+    client = chromadb.HttpClient(
+        settings=Settings(
+            chroma_api_impl="rest",
+            chroma_server_host=os.environ.get("AWS_IP_ADDR"),
+            chroma_server_http_port="8000"
+        ),
+        host=os.environ.get("AWS_IP_ADDR"),
+        port=8000
+    )
+    db = Chroma(embedding_function=get_embedding_function(), client=client, collection_name=COLLECTION_NAME)
 
     # Calculate Page IDs.
     chunks_with_ids = calculate_chunk_ids(chunks)

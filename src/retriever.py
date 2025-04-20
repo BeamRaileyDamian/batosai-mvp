@@ -4,6 +4,7 @@ import requests
 import chromadb
 import streamlit as st
 from langchain_chroma import Chroma
+from chromadb.config import Settings
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
@@ -15,14 +16,16 @@ from lect_gen import create_model
 from embedder import get_embedding_function
 
 def create_retriever(collection_name):
-    # client = chromadb.HttpClient(
-    #     host=os.environ.get("AWS_IP_ADDR"],
-    #     port=8000
-    # )
-    # vectorstore = Chroma(client=client,
-    #                      embedding_function=get_embedding_function())
-    vectorstore = Chroma(persist_directory=CHROMA_PATH,
-                         embedding_function=get_embedding_function())
+    client = chromadb.HttpClient(
+        settings=Settings(
+            chroma_api_impl="rest",
+            chroma_server_host=os.environ.get("AWS_IP_ADDR"),
+            chroma_server_http_port="8000"
+        ),
+        host=os.environ.get("AWS_IP_ADDR"),
+        port=8000
+    )
+    vectorstore = Chroma(client=client, embedding_function=get_embedding_function(), collection_name=COLLECTION_NAME)
     if collection_name == "General":
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
     else:

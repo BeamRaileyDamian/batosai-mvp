@@ -12,7 +12,7 @@ ffmpeg-python
 speechify-api
 firebase_admin
 langchain_groq
-chromadb==0.5.3
+chromadb==0.6.3
 langchain_chroma
 #pysqlite3-binary
 streamlit_lottie
