@@ -14,10 +14,10 @@ def download_all_files():
             zip_buffer = io.BytesIO()
             
             # Get the Supabase client and file structure
-            SUPABASE_URL = os.environ.get("SUPABASE_URL")
-            SUPABASE_KEY = os.environ.get("SUPABASE_API_KEY")
+            SUPABASE_URL = st.secrets["SUPABASE_URL"]
+            SUPABASE_KEY = st.secrets["SUPABASE_API_KEY"]
             client = create_client(SUPABASE_URL, SUPABASE_KEY)
-            structure = list_folders_and_files(client, os.environ.get("BUCKET_NAME"), os.environ.get("BUCKET_FOLDER_PDF"))
+            structure = list_folders_and_files(client, st.secrets["BUCKET_NAME"], st.secrets["BUCKET_FOLDER_PDF"])
             
             # Create a new zip file
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
@@ -79,10 +79,10 @@ def list_folders_and_files(client, bucket_name, folder_path=""):
 
 def main():
     setup("Materials")
-    SUPABASE_URL = os.environ.get("SUPABASE_URL")
-    SUPABASE_KEY = os.environ.get("SUPABASE_API_KEY")
+    SUPABASE_URL = st.secrets["SUPABASE_URL"]
+    SUPABASE_KEY = st.secrets["SUPABASE_API_KEY"]
     client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    structure = list_folders_and_files(client, os.environ.get("BUCKET_NAME"), os.environ.get("BUCKET_FOLDER_PDF"))
+    structure = list_folders_and_files(client, st.secrets["BUCKET_NAME"], st.secrets["BUCKET_FOLDER_PDF"])
 
     # Create session state variables to track download states
     if 'zip_ready' not in st.session_state:

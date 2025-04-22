@@ -53,10 +53,10 @@ def main():
         lect_personality = st.multiselect(label=f"Lecturer Personality", default=["Chill", "Approachable", "Smart"], options=options, max_selections=3)
 
     # Initialize Supabase
-    supabase_url = os.environ.get("SUPABASE_URL")
-    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
-    bucket_name = os.environ.get("BUCKET_NAME")
-    bucket_folder_pdf = os.environ.get("BUCKET_FOLDER_PDF")
+    supabase_url = st.secrets["SUPABASE_URL"]
+    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
+    bucket_name = st.secrets["BUCKET_NAME"]
+    bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
 
     if st.button("Create"):
         if lect_title in st.session_state.lect_ids:
