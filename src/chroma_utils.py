@@ -1,19 +1,18 @@
 import os
 import chromadb
 from config import *
-import streamlit as st
 from dotenv import load_dotenv
 from chromadb.config import Settings
 
 def chromadbClient():
-    # load_dotenv(dotenv_path=".env", override=True)
+    load_dotenv(dotenv_path=".env", override=True)
     chroma_client = chromadb.HttpClient(
         settings=Settings(
             chroma_api_impl="rest",
-            chroma_server_host=st.secrets["AWS_IP_ADDR"],
+            chroma_server_host=os.environ.get("AWS_IP_ADDR"),
             chroma_server_http_port="8000"
         ),
-        host=st.secrets["AWS_IP_ADDR"],
+        host=os.environ.get("AWS_IP_ADDR"),
         port=8000
     )
     print(chroma_client.heartbeat())
