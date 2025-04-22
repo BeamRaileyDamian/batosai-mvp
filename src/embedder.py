@@ -65,12 +65,13 @@ def add_to_chroma(chunks: list[Document]):
         settings=Settings(
             chroma_api_impl="rest",
             chroma_server_host=os.environ.get("AWS_IP_ADDR"),
-            chroma_server_http_port="8000"
+            chroma_server_http_port="8000",
+            persist_directory=CHROMA_PATH
         ),
         host=os.environ.get("AWS_IP_ADDR"),
         port=8000
     )
-    db = Chroma(embedding_function=get_embedding_function(), client=client, collection_name=COLLECTION_NAME)
+    db = Chroma(embedding_function=get_embedding_function(), client=client, collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
 
     # Calculate Page IDs.
     chunks_with_ids = calculate_chunk_ids(chunks)

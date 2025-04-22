@@ -40,7 +40,8 @@ def main():
     client = chromadbClient()
     collections = listCollections(client)
     print(collections)
-    print(len(listDocuments(client, "langchain")))
+    if collections:
+        print(len(listDocuments(client, "cmsc125")))
 
 if __name__ == "__main__":
     main()

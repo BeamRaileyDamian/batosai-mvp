@@ -20,12 +20,13 @@ def create_retriever(collection_name):
         settings=Settings(
             chroma_api_impl="rest",
             chroma_server_host=os.environ.get("AWS_IP_ADDR"),
-            chroma_server_http_port="8000"
+            chroma_server_http_port="8000",
+            persist_directory=CHROMA_PATH
         ),
         host=os.environ.get("AWS_IP_ADDR"),
         port=8000
     )
-    vectorstore = Chroma(client=client, embedding_function=get_embedding_function(), collection_name=COLLECTION_NAME)
+    vectorstore = Chroma(client=client, embedding_function=get_embedding_function(), collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
     if collection_name == "General":
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
     else:
