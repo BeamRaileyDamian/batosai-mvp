@@ -16,10 +16,11 @@ def apply_styles():
             background-color: #f8f9fa;
             border-radius: 5px;
             color: #4b644c;
-            padding: 10px;
-            margin-top: 10px;
+            padding: 5px;
+            margin-top: 5px;
+            font-size: 14px;
             border-left: 3px solid #4682b4;
-            max-height: 550px;
+            max-height: 400px;
             overflow-y: auto;
         }
         .quiz-question {
@@ -69,8 +70,6 @@ def apply_styles():
         </style>
     """, unsafe_allow_html=True)
 
-
-
 def get_quote():
     try:
         collection_ref = st.session_state.db.collection("quotes")
@@ -98,7 +97,7 @@ def main():
     response = requests.get(url)
 
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
-    if "countdown" not in st.session_state: st.session_state.countdown = 10
+    if "countdown" not in st.session_state: st.session_state.countdown = 60
 
     avatar_url = requests.get(os.environ.get("GIF").strip('"')) 
     avatar_url_json = dict() 
@@ -122,7 +121,7 @@ def main():
             if first_slide_relative:
                 first_slide_relative = False
                 with col2_placeholder:
-                    st_lottie(avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.15))
+                    st_lottie(avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
 
                     with transcript_placeholder:
                         transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
@@ -202,7 +201,7 @@ def main():
         notes_header_placeholder.empty()
         
         ################# QUIZ ############################
-        st.session_state.countdown = 10
+        st.session_state.countdown = 120
         
         # Create placeholders for quiz content
         with col1:
@@ -237,7 +236,7 @@ def main():
         # Clear quiz content
         quiz_header_placeholder.empty()
         st.session_state.curr_slide = 0
-        st.session_state.countdown = 10
+        st.session_state.countdown = 60
         
         with col1:
             answers_header_placeholder = st.empty()

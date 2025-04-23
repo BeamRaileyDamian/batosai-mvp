@@ -17,13 +17,15 @@ def setup(tabname):
 def global_styles():
     st.markdown("""
     <style>
-    * {
+    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
+    p {
         font-family: 'Inter', serif !important;
+        font-size: 13px !important;
         letter-spacing: 0.5px !important;
     }
-    
+
     h2 {
-        font-size: 30px !important;
+        font-size: 20px !important;
         font-weight: bold;
     }
                 
