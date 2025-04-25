@@ -271,11 +271,11 @@ def script_gen_last_slide(llm, prev_slide, current_slide, entire_pdf_content, le
 
 def tts_with_speechify(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name):
     client = Speechify(
-        token=os.environ.get("SPEECHIFY_API_KEY"),
+        token=st.secrets["SPEECHIFY_API_KEY"],
     )
     response = client.tts.audio.speech(
         input=text,
-        voice_id=os.environ.get("SPEECHIFY_VOICE_ID"),
+        voice_id=st.secrets["SPEECHIFY_VOICE_ID"],
         audio_format="mp3"
     )
 
@@ -383,7 +383,7 @@ def gen_script_and_quiz(file, lect_num, lect_personality):
     test_content = []
 
     # Load the LLM
-    groq_api_key = os.environ.get('GROQ_API_KEY')
+    groq_api_key = st.secrets['GROQ_API_KEY']
     llm = create_model(groq_api_key)
 
     # Initialize Firebase Firestore
@@ -433,11 +433,11 @@ def gen_script_and_quiz(file, lect_num, lect_personality):
 
 def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
     # Initialize Supabase
-    supabase_url = os.environ.get("SUPABASE_URL")
-    supabase_api_key = os.environ.get("SUPABASE_API_KEY")
-    bucket_name = os.environ.get("BUCKET_NAME")
-    bucket_folder_pdf = os.environ.get("BUCKET_FOLDER_PDF")
-    bucket_folder_audio = os.environ.get("BUCKET_FOLDER_AUDIO")
+    supabase_url = st.secrets["SUPABASE_URL"]
+    supabase_api_key = st.secrets["SUPABASE_API_KEY"]
+    bucket_name = st.secrets["BUCKET_NAME"]
+    bucket_folder_pdf = st.secrets["BUCKET_FOLDER_PDF"]
+    bucket_folder_audio = st.secrets["BUCKET_FOLDER_AUDIO"]
     lect_script = []
 
     # Initialize Firebase Firestore

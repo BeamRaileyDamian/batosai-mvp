@@ -8,3 +8,7 @@ raw_data
 __pycache__
 experiments/
 standalone/
+
+node_modules/
+**/yarn.lock
+**/package-lock.json

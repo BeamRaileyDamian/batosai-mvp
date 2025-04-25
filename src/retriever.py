@@ -19,11 +19,11 @@ def create_retriever(collection_name):
     client = chromadb.HttpClient(
         settings=Settings(
             chroma_api_impl="rest",
-            chroma_server_host=os.environ.get("AWS_IP_ADDR"),
+            chroma_server_host=st.secrets["AWS_IP_ADDR"],
             chroma_server_http_port="8000",
             persist_directory=CHROMA_PATH
         ),
-        host=os.environ.get("AWS_IP_ADDR"),
+        host=st.secrets["AWS_IP_ADDR"],
         port=8000
     )
     vectorstore = Chroma(client=client, embedding_function=get_embedding_function(), collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
@@ -33,12 +33,12 @@ def create_retriever(collection_name):
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10, "filter": {"lesson_id": collection_name}})
 
 def retriever_setup(collection_name):
-    return create_retriever(collection_name), os.environ.get('GROQ_API_KEY')
+    return create_retriever(collection_name), st.secrets['GROQ_API_KEY']
 
 def rerank(documents, query):
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.environ.get('JINA_API_KEY')}"
+        "Authorization": f"Bearer {st.secrets['JINA_API_KEY']}"
     }
     
     # Create documents with both content and metadata
