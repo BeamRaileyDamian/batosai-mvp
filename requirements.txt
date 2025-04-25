@@ -21,3 +21,4 @@ streamlit-pdf-viewer
 langchain_huggingface
 huggingface_hub[hf_xet]
 streamlit-authenticator
+-e ./component

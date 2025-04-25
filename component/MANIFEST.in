@@ -1,1 +1,2 @@
-recursive-include my_component/frontend/build *
+include audio_component/frontend/build *
+recursive-include audio_component/frontend/build *
