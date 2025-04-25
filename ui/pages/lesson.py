@@ -1,5 +1,7 @@
 import os
+import sys
 import time
+import json
 import random
 import base64
 import requests
@@ -9,6 +11,8 @@ import streamlit_js_eval
 from streamlit_lottie import st_lottie
 from audio_component import audio_player
 from streamlit_pdf_viewer import pdf_viewer
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../assets')))
 
 def apply_styles():
     st.markdown("""
@@ -81,11 +85,9 @@ def get_quote():
     except Exception as e:
         return f"Error retrieving document IDs: {str(e)}"
 
-def load_gif(file_path):
-    with open(file_path, "rb") as f:
-        data = f.read()
-    encoded = base64.b64encode(data).decode()
-    return encoded
+def load_local_lottie(filepath):
+    with open(filepath, "r") as f:
+        return json.load(f)
 
 def main():
     if not "curr_lect" in st.session_state or not st.session_state.curr_lect or not "lect_script" in st.session_state or not st.session_state.lect_script: 
@@ -99,12 +101,8 @@ def main():
 
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 60
+    if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
     st.session_state.first_slide_relative = True
-
-    avatar_url = requests.get(st.secrets["GIF"].strip('"')) 
-    avatar_url_json = dict() 
-    if avatar_url.status_code == 200: avatar_url_json = avatar_url.json() 
-    else: print("Error in the URL") 
 
     quote = get_quote()
     apply_styles()
@@ -140,7 +138,7 @@ def main():
             if st.session_state.first_slide_relative:
                 st.session_state.first_slide_relative = False
                 with col2_placeholder:
-                    st_lottie(avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
+                    st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
 
                     with transcript_placeholder:
                         transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
