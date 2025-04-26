@@ -2,8 +2,8 @@ import torch
 from utils import *
 import streamlit as st
 
-__import__('pysqlite3')
 import sys
+import pysqlite3
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 torch.classes.__path__ = []
 
