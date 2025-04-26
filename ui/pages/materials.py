@@ -1,5 +1,4 @@
 import io
-import os
 import zipfile
 import requests
 from utils import *

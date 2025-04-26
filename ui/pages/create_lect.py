@@ -4,6 +4,9 @@ from utils import *
 import streamlit as st
 from supabase import create_client, Client
 
+# import pysqlite3
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from src.lect_gen import *
 from src.embedder import create_embeddings

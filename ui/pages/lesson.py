@@ -3,7 +3,6 @@ import sys
 import time
 import json
 import random
-import base64
 import requests
 from utils import *
 import streamlit as st
