@@ -1,5 +1,4 @@
 gtts
-pydub
 pypdf
 torch
 pymupdf

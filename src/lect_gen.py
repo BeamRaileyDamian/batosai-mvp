@@ -7,14 +7,11 @@ import fitz
 import pytesseract
 from PIL import Image
 import firebase_admin
-from gtts import gTTS
-from math import ceil
 import streamlit as st
 from json import loads
 from speechify import Speechify
 from langchain_groq import ChatGroq
 from firebase_admin import firestore
-from pydub import AudioSegment, effects
 from supabase import create_client, Client
 from google.cloud.firestore_v1 import FieldFilter
 
@@ -283,28 +280,22 @@ def tts_with_speechify(text, bucket_folder, lect_title, supabase_url, supabase_a
     audio_bytes = base64.b64decode(audio)
     filename = f"{uuid.uuid4()}.mp3"
 
-    audio_fp = io.BytesIO(audio_bytes)
-    audio_segment = AudioSegment.from_file(audio_fp, format="mp3")
-    duration = ceil(audio_segment.duration_seconds)
-
     public_url = upload_to_supabase(audio_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
-    return public_url, duration
+    return public_url
 
-def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
-    # Generate TTS audio
-    tts = gTTS(text=text, lang=lang)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
+# def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
+#     tts = gTTS(text=text, lang=lang)
+#     fp = io.BytesIO()
+#     tts.write_to_fp(fp)
+#     fp.seek(0)
     
-    audio = AudioSegment.from_file(fp, format="mp3")
-    audio = effects.speedup(audio, playback_speed=5) #1.1
-    duration = ceil(audio.duration_seconds)
-    filename = f"{uuid.uuid4()}.mp3"
-    file_bytes = audio.export(format="mp3").read()
+#     audio = AudioSegment.from_file(fp, format="mp3")
+#     audio = effects.speedup(audio, playback_speed=5)
+#     filename = f"{uuid.uuid4()}.mp3"
+#     file_bytes = audio.export(format="mp3").read()
 
-    public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
-    return public_url, duration
+#     public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
+#     return public_url
 
 def shorter(llm, script):
     prompt = f"""
@@ -447,14 +438,13 @@ def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
     db = firestore.client()
 
     for script in scripts:
-        public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
-        #public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        # public_url_audio = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        public_url_audio = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
         if not public_url_audio: return False
 
         lect_script.append({
             "script": script,
-            "audio": public_url_audio,
-            "duration": duration
+            "audio": public_url_audio
         })
 
     # Upload PDF file
