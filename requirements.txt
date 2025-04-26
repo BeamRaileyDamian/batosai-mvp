@@ -13,7 +13,6 @@ firebase_admin
 langchain_groq
 chromadb==0.6.3
 langchain_chroma
-#pysqlite3-binary
 streamlit_lottie
 streamlit_js_eval
 langchain_community

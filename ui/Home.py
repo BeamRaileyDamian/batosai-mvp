@@ -2,9 +2,9 @@ import torch
 from utils import *
 import streamlit as st
 
-# __import__('pysqlite3')
-# import sys
-# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 torch.classes.__path__ = []
 
 def main():
@@ -17,7 +17,7 @@ def main():
     st.markdown(
         """
         bat.OS.AI is your intelligent tutor, designed to make asynchronous learning of **CMSC 125 (Operating Systems)** engaging and effective.  
-        Using cutting-edge AI technology, bat.OS.AI provides personalized tutoring experiences through interactive lesson materials and an AI-powered chatbot.  
+        Using cutting-edge AI technology, bat.OS.AI provides tutoring experiences through lesson materials and an AI-powered chatbot.  
 
         ### 🚀 **Key Features**
         - **📚 Lesson Materials:** Access comprehensive lessons covering various Operating Systems topics, designed to help you grasp concepts easily.  
