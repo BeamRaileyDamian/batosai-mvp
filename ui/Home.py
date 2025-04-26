@@ -1,11 +1,5 @@
-import torch
 from utils import *
 import streamlit as st
-
-import sys
-import pysqlite3
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-torch.classes.__path__ = []
 
 def main():
     setup("bat.OS.AI")

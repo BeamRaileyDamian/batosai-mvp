@@ -9,8 +9,8 @@ def main():
 
     config = {
         "credentials": st.secrets["credentials"].to_dict(),
-        "cookie": st.secrets["cookie"],
-        "preauthorized": st.secrets["preauthorized"]
+        "cookie": st.secrets['cookie'],
+        "preauthorized": st.secrets['preauthorized']
     }
 
     authenticator = stauth.Authenticate(
@@ -24,7 +24,7 @@ def main():
     if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
         st.session_state.admin_title = "⚙️ Admin Panel"
     elif st.session_state["authentication_status"] and st.session_state["name"]:
-        st.session_state.admin_title = f'👋 Welcome, {config['credentials']['usernames'][st.session_state["username"]]["name"]}'
+        st.session_state.admin_title = f'👋 Welcome, {config["credentials"]["usernames"][st.session_state["username"]]["name"]}'
 
     st.title(st.session_state.admin_title)
 

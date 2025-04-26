@@ -3,6 +3,12 @@ README.md
 setup.py
 audio_component/__init__.py
 audio_component/example.py
+audio_component/frontend/build/asset-manifest.json
+audio_component/frontend/build/bootstrap.min.css
+audio_component/frontend/build/index.html
+audio_component/frontend/build/static/js/main.0637838f.js
+audio_component/frontend/build/static/js/main.0637838f.js.LICENSE.txt
+audio_component/frontend/build/static/js/main.0637838f.js.map
 streamlit_custom_component.egg-info/PKG-INFO
 streamlit_custom_component.egg-info/SOURCES.txt
 streamlit_custom_component.egg-info/dependency_links.txt

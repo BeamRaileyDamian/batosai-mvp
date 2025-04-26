@@ -1,17 +1,13 @@
-gtts
 pypdf
-torch
 pymupdf
 supabase
 streamlit
 pytesseract
 python-dotenv
-ffmpeg-python
 speechify-api
 firebase_admin
 langchain_groq
 chromadb==0.6.3
-pysqlite3-binary
 langchain_chroma
 streamlit_lottie
 streamlit_js_eval
