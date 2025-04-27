@@ -100,6 +100,7 @@ def get_quote():
     except Exception as e:
         return f"Error retrieving document IDs: {str(e)}"
 
+@st.cache_data
 def load_local_lottie(filepath):
     with open(filepath, "r") as f:
         return json.load(f)
