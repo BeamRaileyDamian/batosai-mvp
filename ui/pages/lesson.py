@@ -117,7 +117,6 @@ def main():
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 60
     if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
-    st.session_state.first_slide_relative = True
 
     quote = get_quote()
     apply_styles()
@@ -136,6 +135,9 @@ def main():
                 col2_placeholder = st.empty()
                 transcript_placeholder = st.empty()
 
+            with col2_placeholder:
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
+
             with col1:
                 with col1_placeholder:
                     pdf_viewer(
@@ -145,21 +147,6 @@ def main():
                         render_text=True,
                         key=f"slide_{st.session_state.curr_slide}"
                     )
-            
-            with transcript_placeholder:
-                transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
-                duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
-                st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
-
-            if st.session_state.first_slide_relative:
-                st.session_state.first_slide_relative = False
-                with col2_placeholder:
-                    st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
-
-                    with transcript_placeholder:
-                        transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
-                        duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
-                        st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
 
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide]["audio"]          
@@ -183,6 +170,11 @@ def main():
 
             except Exception as e:
                 st.error(f'Error playing: {e}')
+            
+            with transcript_placeholder:
+                transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
+                duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
+                st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
 
         else: 
             transcript_placeholder.empty()
