@@ -26,7 +26,23 @@ def apply_styles():
             border-left: 3px solid #4682b4;
             max-height: 400px;
             overflow-y: auto;
+            position: relative;
         }
+
+        .transcript-text {
+            padding-bottom: 20px;
+            animation-play-state: running;
+        }
+                
+        .transcript-container:hover .transcript-text {
+            animation-play-state: paused !important;
+        }
+                
+        @keyframes autoscroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(calc(-100% + 380px)); }
+        }        
+                
         .quiz-question {
             font-size: 20px;
             font-weight: bold;
@@ -132,7 +148,8 @@ def main():
             
             with transcript_placeholder:
                 transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
-                st.markdown(f'<div class="transcript-container">{transcript_text}</div>', unsafe_allow_html=True)
+                duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
+                st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
 
             if st.session_state.first_slide_relative:
                 st.session_state.first_slide_relative = False
@@ -141,7 +158,8 @@ def main():
 
                     with transcript_placeholder:
                         transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
-                        st.markdown(f'<div class="transcript-container">{transcript_text}</div>', unsafe_allow_html=True)
+                        duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
+                        st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
 
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide]["audio"]          
