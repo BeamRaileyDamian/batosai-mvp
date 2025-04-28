@@ -115,9 +115,9 @@ def main():
     url = st.session_state.lect_script["pdf_url"]
     response = requests.get(url)
 
-    if "curr_slide" not in st.session_state: st.session_state.curr_slide = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 60
     if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
+    if st.session_state.curr_lect not in st.session_state.curr_slide: st.session_state.curr_slide[st.session_state.curr_lect] = 0
 
     quote = get_quote()
     apply_styles()
@@ -128,7 +128,7 @@ def main():
         col2_placeholder = st.empty()
         transcript_placeholder = st.empty()
 
-        if st.session_state.curr_slide < st.session_state.lect_script["slides_count"]:
+        if st.session_state.curr_slide[st.session_state.curr_lect] < st.session_state.lect_script["slides_count"]:
             with col1:
                 col1_placeholder = st.empty()
             
@@ -137,33 +137,34 @@ def main():
                 transcript_placeholder = st.empty()
 
             with col2_placeholder:
-                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide}", width=int(screen_width*0.12))
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
+                #st.image("assets/wow.gif", width=int(screen_width*0.12))
 
             with col1:
                 with col1_placeholder:
                     pdf_viewer(
                         input=response.content, 
                         width=int(screen_width*0.85),
-                        pages_to_render=[st.session_state.curr_slide+1],
+                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
                         render_text=True,
-                        key=f"slide_{st.session_state.curr_slide}"
+                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
                     )
 
             try:
-                mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide]["audio"]          
+                mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["audio"]          
 
-                if f"audio_done_{st.session_state.curr_slide}" not in st.session_state:
-                    st.session_state[f"audio_done_{st.session_state.curr_slide}"] = False
+                if f"audio_done_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}" not in st.session_state:
+                    st.session_state[f"audio_done_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}"] = False
 
-                if not st.session_state[f"audio_done_{st.session_state.curr_slide}"]:
-                    result = audio_player(mp3_url, key=f"audio_{st.session_state.curr_slide}")
+                if not st.session_state[f"audio_done_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}"]:
+                    result = audio_player(mp3_url, key=f"audio_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}")
 
                     if result:
                         if result.get("event") == "audio_ended":
-                            st.session_state[f"audio_done_{st.session_state.curr_slide}"] = True
+                            st.session_state[f"audio_done_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}"] = True
                 
-                if st.session_state[f"audio_done_{st.session_state.curr_slide}"]:
-                    st.session_state.curr_slide += 1
+                if st.session_state[f"audio_done_{st.session_state.curr_lect}_{st.session_state.curr_slide[st.session_state.curr_lect]}"]:
+                    st.session_state.curr_slide[st.session_state.curr_lect] += 1
                     transcript_placeholder.empty()
                     col1_placeholder.empty()
                     col2_placeholder.empty()
@@ -173,8 +174,8 @@ def main():
                 st.error(f'Error playing: {e}')
             
             with transcript_placeholder:
-                transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide]["script"]
-                duration = st.session_state.lect_script["script"][st.session_state.curr_slide]["duration"] + 5
+                transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["script"]
+                duration = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["duration"] + 5
                 st.markdown(f'<div class="transcript-container"><div class="transcript-text" style="animation: autoscroll {duration}s linear forwards;">{transcript_text}</div></div>', unsafe_allow_html=True)
 
         else: 
@@ -251,7 +252,7 @@ def main():
             ################# QUIZ ANSWERS ############################
             # Clear quiz content
             quiz_header_placeholder.empty()
-            st.session_state.curr_slide = 0
+            st.session_state.curr_slide[st.session_state.curr_lect] = 0
             st.session_state.countdown = 60
             
             with col1:

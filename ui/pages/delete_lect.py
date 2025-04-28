@@ -66,17 +66,17 @@ def main():
                 result = delete_from_firebase(st.session_state.db, "lect_scripts", id)
                 result2 = delete_supabase_folder(client, bucket_name, f"{folder_name}/{id}/")
 
-                client = chromadb.HttpClient(
-                    settings=Settings(
-                        chroma_api_impl="rest",
-                        chroma_server_host=st.secrets["AWS_IP_ADDR"],
-                        chroma_server_http_port="8000"
-                    ),
-                    host=st.secrets["AWS_IP_ADDR"],
-                    port=8000
-                )
-                collection = client.get_or_create_collection(name=COLLECTION_NAME)
-                collection.delete(where={"lesson_id": id})
+                # chroma_client = chromadb.HttpClient(
+                #     settings=Settings(
+                #         chroma_api_impl="rest",
+                #         chroma_server_host=st.secrets["AWS_IP_ADDR"],
+                #         chroma_server_http_port="8000"
+                #     ),
+                #     host=st.secrets["AWS_IP_ADDR"],
+                #     port=8000
+                # )
+                # collection = chroma_client.get_or_create_collection(name=COLLECTION_NAME)
+                # collection.delete(where={"lesson_id": id})
                 
                 if result and result2:
                     st.session_state.lect_ids.remove(id)
