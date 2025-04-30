@@ -1,9 +1,9 @@
 from utils import *
 import streamlit as st
 
-# import sys
-# import pysqlite3
-# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+import sys
+import pysqlite3
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 def main():
     setup("bat.OS.AI")
