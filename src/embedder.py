@@ -20,6 +20,7 @@ def create_embeddings(pdfs_stream, lesson_id, pdf_filenames, pdfs_url):
     add_to_chroma(chunks)
     return True
 
+@st.cache_resource
 def get_embedding_function():
     return HuggingFaceEmbeddings(model_name=MODEL_NAME, model_kwargs={"device": "cpu"})
 
