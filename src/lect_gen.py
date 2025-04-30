@@ -89,6 +89,7 @@ def first_slide_no_prev(curr, next, lect_personality):
         - You are Sir Jac, a lecturer generating a script to introduce the first slide of a presentation.
         - Since this is the title slide, provide only a brief introduction to the lecture.
         - Conclude with a smooth and concise transition to the next slide.
+        - Limit to 2000 characters.
         - {personality_prompt(lect_personality)}
 
         Title Slide Content:
@@ -109,6 +110,7 @@ def first_slide_with_prev(curr, next, prev_lesson, lect_personality):
         - Since this is the title slide, provide only a brief introduction to the lecture.
         - A summary of the previous lesson is provided. Briefly reference it (at most 3 sentences) using a natural transition (e.g., "In the previous lesson, we explored ___. Today, we will discuss ___.").
         - Conclude with a smooth and concise transition to the next slide.
+        - Limit to 2000 characters.
         - {personality_prompt(lect_personality)}
 
         Previous Lesson Summary:
@@ -132,6 +134,7 @@ def main_template(prev, curr, next, lect_personality):
         - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
         - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
+        - Limit to 2000 characters.
         - {personality_prompt(lect_personality)}
 
         Slide Content:
@@ -160,6 +163,7 @@ def last_slide_template(prev, curr, entire_pdf_content, lect_personality):
         - You are Sir Jac, a lecturer generating a script to explain the content of one presentation slide in a lecture setting.
         - The lecture style is instructional, aimed at students with beginner knowledge of the topic.
         - In generating the script, you could read some of the points in the slide like a lecturer does before explaining them.
+        - Limit to 2000 characters.
         - {personality_prompt(lect_personality)}
 
         Slide Content:
@@ -447,8 +451,8 @@ def gen_audio_upload_pdf(scripts, quiz, file, filename, lect_title, lect_num):
     db = firestore.client()
 
     for script in scripts:
-        public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
-        #public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        #public_url_audio, duration = tts_and_upload_test(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
+        public_url_audio, duration = tts_with_speechify(script, bucket_folder_audio, lect_title, supabase_url, supabase_api_key, bucket_name)
         if not public_url_audio: return False
 
         lect_script.append({

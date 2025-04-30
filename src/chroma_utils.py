@@ -2,11 +2,11 @@ import os
 import chromadb
 from config import *
 import streamlit as st
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from chromadb.config import Settings
 
 def chromadbClient():
-    load_dotenv(dotenv_path=".env", override=True)
+    # load_dotenv(dotenv_path=".env", override=True)
     chroma_client = chromadb.HttpClient(
         settings=Settings(
             chroma_api_impl="rest",

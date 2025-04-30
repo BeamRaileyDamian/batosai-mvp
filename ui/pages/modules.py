@@ -21,12 +21,8 @@ def main():
             text = f"{emoji} Module {module_number}: {id}" if module_number is not None else f"{emoji} {id}"
             if st.button(text):
                 if st.session_state.curr_lect != id:
-                    # print(st.session_state.curr_lect, id)
-
                     st.session_state.curr_lect = id
                     st.session_state.curr_slide[id] = 0
-                    # for key, val in st.session_state.curr_slide.items():
-                    #     print(key, ": ", val)
 
                     doc_ref = st.session_state.db.collection("lect_scripts").document(id)
                     doc = doc_ref.get()
