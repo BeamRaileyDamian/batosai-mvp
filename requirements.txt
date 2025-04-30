@@ -19,4 +19,5 @@ streamlit-pdf-viewer
 langchain_huggingface
 huggingface_hub[hf_xet]
 streamlit-authenticator
+protobuf==3.20.3
 -e ./component
