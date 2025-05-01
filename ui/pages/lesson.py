@@ -141,14 +141,14 @@ def main():
 
             with col1:
                 with col1_placeholder:
-                    # pdf_viewer(
-                    #     input=response.content, 
-                    #     width=int(screen_width*0.85),
-                    #     pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
-                    #     render_text=True,
-                    #     key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
-                    # )
-                    pass
+                    pdf_viewer(
+                        input=response.content, 
+                        width=int(screen_width*0.85),
+                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
+                        render_text=True,
+                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
+                    )
+
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["audio"]          
 
