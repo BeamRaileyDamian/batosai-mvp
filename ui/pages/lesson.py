@@ -136,20 +136,19 @@ def main():
                 transcript_placeholder = st.empty()
 
             with col2_placeholder:
-                #st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
                 #st.image("assets/wow.gif", width=int(screen_width*0.12))
-                pass
 
             with col1:
                 with col1_placeholder:
-                    pdf_viewer(
-                        input=response.content, 
-                        width=int(screen_width*0.85),
-                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
-                        render_text=True,
-                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
-                    )
-
+                    # pdf_viewer(
+                    #     input=response.content, 
+                    #     width=int(screen_width*0.85),
+                    #     pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
+                    #     render_text=True,
+                    #     key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
+                    # )
+                    pass
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["audio"]          
 
