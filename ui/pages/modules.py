@@ -1,18 +1,37 @@
+import json
+import random
 import streamlit as st
+import streamlit_js_eval
 from utils import *
 
+def load_local_lottie(filepath):
+    with open(filepath, "r") as f:
+        return json.load(f)
+
+def get_quote():
+    try:
+        collection_ref = st.session_state.db.collection("quotes")
+        docs = collection_ref.stream()
+        doc_list = list(docs)
+        random_doc = random.choice(doc_list)
+        return random_doc.to_dict()["quote"]
+    except Exception as e:
+        return f"Error retrieving document IDs: {str(e)}"
+
 def main():
+    setup("Lessons")
     fetch_module_numbers()
     fetch_lect_ids()
     sort_lectures(st.session_state.lect_ids, st.session_state.module_numbers)
     if "lect_script" not in st.session_state: st.session_state.lect_script = None
     if "curr_lect" not in st.session_state: st.session_state.curr_lect = None
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = {}
+    if "screen_width" not in st.session_state or not st.session_state.screen_width: st.session_state.screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
+    if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
 
     st.session_state.pdf_response = None
-    st.session_state.quote = None
+    st.session_state.quote = get_quote()
 
-    setup("Lessons")
     st.title("🧑‍🏫 CMSC 125 Lessons")
     button_styles()
     study_emojis = ["📚", "📖", "📝", "🎓", "📕", "📂", "📑", "🖊️", "📒", "📜", "💡", "🧠", "🗂️"]

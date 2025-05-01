@@ -90,31 +90,14 @@ def apply_styles():
         </style>
     """, unsafe_allow_html=True)
 
-def get_quote():
-    try:
-        collection_ref = st.session_state.db.collection("quotes")
-        docs = collection_ref.stream()
-        doc_list = list(docs)
-        random_doc = random.choice(doc_list)
-        return random_doc.to_dict()["quote"]
-    except Exception as e:
-        return f"Error retrieving document IDs: {str(e)}"
-
-def load_local_lottie(filepath):
-    with open(filepath, "r") as f:
-        return json.load(f)
-
 def main():
     if not "curr_lect" in st.session_state or not st.session_state.curr_lect or not "lect_script" in st.session_state or not st.session_state.lect_script: 
         st.switch_page("pages/modules.py")
     
     setup(st.session_state.curr_lect)
-    if "screen_width" not in st.session_state or not st.session_state.screen_width: st.session_state.screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
     if not st.session_state.pdf_response: st.session_state.pdf_response = requests.get(st.session_state.lect_script["pdf_url"])
-    if "countdown" not in st.session_state: st.session_state.countdown = 60
-    if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
     if st.session_state.curr_lect not in st.session_state.curr_slide: st.session_state.curr_slide[st.session_state.curr_lect] = 0
-    if not st.session_state.quote: st.session_state.quote = get_quote()
+    if "countdown" not in st.session_state: st.session_state.countdown = 60
     apply_styles()
 
     if st.session_state.screen_width:
