@@ -44,11 +44,11 @@ def global_styles():
         background-color: #f8f9fa;
         border-radius: 5px;
         color: #4b644c;
-        padding: 5px;
+        padding: 2px;
         margin-top: 5px;
         font-size: 14px;
         border-left: 3px solid #4682b4;
-        max-height: 400px;
+        max-height: 425px;
         overflow-y: auto;
         position: relative;
     }

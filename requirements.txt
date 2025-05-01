@@ -8,7 +8,6 @@ langchain_groq
 chromadb==0.6.3
 pysqlite3-binary
 langchain_chroma
-streamlit_lottie
 streamlit_js_eval
 langchain_community
 streamlit-pdf-viewer

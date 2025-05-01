@@ -1,13 +1,8 @@
-import json
 import random
 import requests
 import streamlit as st
 import streamlit_js_eval
 from utils import *
-
-def load_local_lottie(filepath):
-    with open(filepath, "r") as f:
-        return json.load(f)
 
 def get_quote():
     try:
@@ -28,7 +23,6 @@ def main():
     if "curr_lect" not in st.session_state: st.session_state.curr_lect = None
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = {}
     if "screen_width" not in st.session_state or not st.session_state.screen_width: st.session_state.screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
-    if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
     st.session_state.quote = get_quote()
 
     st.title("🧑‍🏫 CMSC 125 Lessons")
