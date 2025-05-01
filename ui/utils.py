@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from firebase_admin import credentials, firestore
 
 def setup(tabname):
-    load_dotenv(override=True)
     st.set_page_config(layout="wide", page_icon="🤖", page_title=tabname, menu_items={"About": "### Beam Damian - CMSC 190 ", "Report a Bug": "mailto:bmdamian@up.edu.ph", "Get help": "mailto:bmdamian@up.edu.ph"})
     global_styles()
     st.logo("assets/sidebar_logo.png", icon_image="assets/main_logo.png", size="large")

@@ -31,6 +31,19 @@ def main():
                 col2_placeholder = st.empty()
                 transcript_placeholder = st.empty()
 
+            with col1:
+                with col1_placeholder:
+                    pdf_viewer(
+                        input=st.session_state.pdf_response.content, 
+                        width=int(st.session_state.screen_width*0.85),
+                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
+                        render_text=True,
+                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
+                    )
+
+            with col2_placeholder:
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(st.session_state.screen_width*0.12))
+
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["audio"]          
 
@@ -54,19 +67,6 @@ def main():
             except Exception as e:
                 st.error(f'Error playing: {e}')
 
-            with col2_placeholder:
-                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(st.session_state.screen_width*0.12))
-
-            with col1:
-                with col1_placeholder:
-                    pdf_viewer(
-                        input=st.session_state.pdf_response.content, 
-                        width=int(st.session_state.screen_width*0.85),
-                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
-                        render_text=True,
-                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
-                    )
-            
             with transcript_placeholder:
                 transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["script"]
                 duration = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["duration"] + 5
