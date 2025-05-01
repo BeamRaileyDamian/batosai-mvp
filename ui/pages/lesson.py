@@ -1,104 +1,21 @@
 import os
 import sys
 import time
-import json
-import random
-import requests
 from utils import *
 import streamlit as st
-import streamlit_js_eval
 from streamlit_lottie import st_lottie
 from audio_component import audio_player
 from streamlit_pdf_viewer import pdf_viewer
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../assets')))
 
-def apply_styles():
-    st.markdown("""
-        <style>
-        .transcript-container {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            color: #4b644c;
-            padding: 5px;
-            margin-top: 5px;
-            font-size: 14px;
-            border-left: 3px solid #4682b4;
-            max-height: 400px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .transcript-text {
-            padding-bottom: 20px;
-            animation-play-state: running;
-        }
-                
-        .transcript-container:hover .transcript-text {
-            animation-play-state: paused !important;
-        }
-                
-        @keyframes autoscroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(calc(-100% + 380px)); }
-        }        
-                
-        .quiz-question {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #e0e0e0; /* Lighter text for green board */
-        }
-        .quiz-answer {
-            font-size: 18px;
-            color: white;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #567257;
-            border-left: 4px solid #59B75B;
-            border-radius: 5px;
-        }
-        .timer {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding: 10px;
-            text-align: center;
-            
-            background-color: #59B75B !important;
-            color: white !important;
-            border-radius: 8px !important;
-            border: 1px solid #284329 !important;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2) !important; 
-        }
-        
-        .green-board {
-            background-color: #4b644c;
-            background-size: 30px 30px;
-            border-radius: 10px;
-            padding: 20px;
-            color: #e0e0e0;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            min-height: 400px;
-        }
-        
-        .green-board h2 {
-            color: #ffffff;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
 def main():
     if not "curr_lect" in st.session_state or not st.session_state.curr_lect or not "lect_script" in st.session_state or not st.session_state.lect_script: 
         st.switch_page("pages/modules.py")
     
     setup(st.session_state.curr_lect)
-    if not st.session_state.pdf_response: st.session_state.pdf_response = requests.get(st.session_state.lect_script["pdf_url"])
     if st.session_state.curr_lect not in st.session_state.curr_slide: st.session_state.curr_slide[st.session_state.curr_lect] = 0
     if "countdown" not in st.session_state: st.session_state.countdown = 60
-    apply_styles()
 
     if st.session_state.screen_width:
         col1, col2 = st.columns([0.85, 0.15], border=False)
@@ -113,19 +30,6 @@ def main():
             with col2:
                 col2_placeholder = st.empty()
                 transcript_placeholder = st.empty()
-
-            with col2_placeholder:
-                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(st.session_state.screen_width*0.12))
-
-            with col1:
-                with col1_placeholder:
-                    pdf_viewer(
-                        input=st.session_state.pdf_response.content, 
-                        width=int(st.session_state.screen_width*0.85),
-                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
-                        render_text=True,
-                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
-                    )
 
             try:
                 mp3_url = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["audio"]          
@@ -149,6 +53,19 @@ def main():
 
             except Exception as e:
                 st.error(f'Error playing: {e}')
+
+            with col2_placeholder:
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(st.session_state.screen_width*0.12))
+
+            with col1:
+                with col1_placeholder:
+                    pdf_viewer(
+                        input=st.session_state.pdf_response.content, 
+                        width=int(st.session_state.screen_width*0.85),
+                        pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
+                        render_text=True,
+                        key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
+                    )
             
             with transcript_placeholder:
                 transcript_text = st.session_state.lect_script["script"][st.session_state.curr_slide[st.session_state.curr_lect]]["script"]
