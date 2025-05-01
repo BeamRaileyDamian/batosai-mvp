@@ -100,7 +100,6 @@ def get_quote():
     except Exception as e:
         return f"Error retrieving document IDs: {str(e)}"
 
-@st.cache_data
 def load_local_lottie(filepath):
     with open(filepath, "r") as f:
         return json.load(f)
@@ -137,8 +136,9 @@ def main():
                 transcript_placeholder = st.empty()
 
             with col2_placeholder:
-                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
+                #st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
                 #st.image("assets/wow.gif", width=int(screen_width*0.12))
+                pass
 
             with col1:
                 with col1_placeholder:
