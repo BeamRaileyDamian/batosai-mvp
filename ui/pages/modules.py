@@ -9,6 +9,9 @@ def main():
     if "curr_lect" not in st.session_state: st.session_state.curr_lect = None
     if "curr_slide" not in st.session_state: st.session_state.curr_slide = {}
 
+    st.session_state.pdf_response = None
+    st.session_state.quote = None
+
     setup("Lessons")
     st.title("🧑‍🏫 CMSC 125 Lessons")
     button_styles()

@@ -107,21 +107,17 @@ def load_local_lottie(filepath):
 def main():
     if not "curr_lect" in st.session_state or not st.session_state.curr_lect or not "lect_script" in st.session_state or not st.session_state.lect_script: 
         st.switch_page("pages/modules.py")
-    else: 
-        setup(st.session_state.curr_lect)
-
-    screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
-    url = st.session_state.lect_script["pdf_url"]
-    response = requests.get(url)
-
+    
+    setup(st.session_state.curr_lect)
+    if "screen_width" not in st.session_state or not st.session_state.screen_width: st.session_state.screen_width = streamlit_js_eval.streamlit_js_eval(js_expressions='screen.width', key = 'SCR')
+    if not st.session_state.pdf_response: st.session_state.pdf_response = requests.get(st.session_state.lect_script["pdf_url"])
     if "countdown" not in st.session_state: st.session_state.countdown = 60
     if "avatar_url_json" not in st.session_state: st.session_state.avatar_url_json = load_local_lottie("assets/gif.json")
     if st.session_state.curr_lect not in st.session_state.curr_slide: st.session_state.curr_slide[st.session_state.curr_lect] = 0
-
-    quote = get_quote()
+    if not st.session_state.quote: st.session_state.quote = get_quote()
     apply_styles()
 
-    if screen_width:
+    if st.session_state.screen_width:
         col1, col2 = st.columns([0.85, 0.15], border=False)
         col1_placeholder = st.empty()
         col2_placeholder = st.empty()
@@ -136,14 +132,13 @@ def main():
                 transcript_placeholder = st.empty()
 
             with col2_placeholder:
-                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(screen_width*0.12))
-                #st.image("assets/wow.gif", width=int(screen_width*0.12))
+                st_lottie(st.session_state.avatar_url_json, key=f"small_lottie_{st.session_state.curr_slide[st.session_state.curr_lect]}", width=int(st.session_state.screen_width*0.12))
 
             with col1:
                 with col1_placeholder:
                     pdf_viewer(
-                        input=response.content, 
-                        width=int(screen_width*0.85),
+                        input=st.session_state.pdf_response.content, 
+                        width=int(st.session_state.screen_width*0.85),
                         pages_to_render=[st.session_state.curr_slide[st.session_state.curr_lect]+1],
                         render_text=True,
                         key=f"slide_{st.session_state.curr_slide[st.session_state.curr_lect]}"
@@ -191,7 +186,7 @@ def main():
                 notes_content = f'''
                 <div class="green-board">
                     <h2>Review your notes in preparation for a quiz! 🧠</h2>
-                    <div style="color: #e0e0e0; text-align: center; font-weight: bold; font-size: 25px; margin-top: 20px;">{quote}</div>
+                    <div style="color: #e0e0e0; text-align: center; font-weight: bold; font-size: 25px; margin-top: 20px;">{st.session_state.quote}</div>
                 </div>
                 '''
                 notes_header_placeholder.markdown(notes_content, unsafe_allow_html=True)
