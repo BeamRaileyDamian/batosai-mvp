@@ -1,11 +1,7 @@
-gtts
-pypdf
 pydub
 pymupdf
 supabase
 streamlit
-pytesseract
-python-dotenv
 speechify-api
 firebase_admin
 langchain_groq

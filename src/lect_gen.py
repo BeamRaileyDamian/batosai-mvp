@@ -7,7 +7,7 @@ import fitz
 import pytesseract
 from PIL import Image
 import firebase_admin
-from gtts import gTTS
+# from gtts import gTTS
 from math import ceil
 import streamlit as st
 from json import loads
@@ -294,21 +294,21 @@ def tts_with_speechify(text, bucket_folder, lect_title, supabase_url, supabase_a
     public_url = upload_to_supabase(audio_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
     return public_url, duration
 
-def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
-    # Generate TTS audio
-    tts = gTTS(text=text, lang=lang)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
+# def tts_and_upload_test(text, bucket_folder, lect_title, supabase_url, supabase_api_key, bucket_name, lang="en"):
+#     # Generate TTS audio
+#     tts = gTTS(text=text, lang=lang)
+#     fp = io.BytesIO()
+#     tts.write_to_fp(fp)
+#     fp.seek(0)
     
-    audio = AudioSegment.from_file(fp, format="mp3")
-    audio = effects.speedup(audio, playback_speed=5) #1.1
-    duration = ceil(audio.duration_seconds)
-    filename = f"{uuid.uuid4()}.mp3"
-    file_bytes = audio.export(format="mp3").read()
+#     audio = AudioSegment.from_file(fp, format="mp3")
+#     audio = effects.speedup(audio, playback_speed=5) #1.1
+#     duration = ceil(audio.duration_seconds)
+#     filename = f"{uuid.uuid4()}.mp3"
+#     file_bytes = audio.export(format="mp3").read()
 
-    public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
-    return public_url, duration
+#     public_url = upload_to_supabase(file_bytes, f"{bucket_folder}/{lect_title}/{filename}", supabase_url, supabase_api_key, bucket_name, "audio/mpeg")
+#     return public_url, duration
 
 def shorter(llm, script):
     prompt = f"""
