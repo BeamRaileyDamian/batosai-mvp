@@ -13,9 +13,10 @@ from langchain_core.messages import HumanMessage, AIMessage
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from config import *
 from lect_gen import create_model
-from embedder import get_embedding_function
+from embedder import pull_model
 
 def create_retriever(collection_name):
+    if "embedding_model" not in st.session_state: st.session_state.embedding_model = pull_model()
     client = chromadb.HttpClient(
         settings=Settings(
             chroma_api_impl="rest",
@@ -26,7 +27,7 @@ def create_retriever(collection_name):
         host=st.secrets["AWS_IP_ADDR"],
         port=8000
     )
-    vectorstore = Chroma(client=client, embedding_function=get_embedding_function(), collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
+    vectorstore = Chroma(client=client, embedding_function=st.session_state.embedding_model, collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
     if collection_name == "General":
         return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 10})
     else:

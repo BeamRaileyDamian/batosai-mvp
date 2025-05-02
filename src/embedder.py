@@ -21,7 +21,7 @@ def create_embeddings(pdfs_stream, lesson_id, pdf_filenames, pdfs_url):
     return True
 
 @st.cache_resource
-def get_embedding_function():
+def pull_model():
     return HuggingFaceEmbeddings(model_name=MODEL_NAME, model_kwargs={"device": "cpu"})
 
 def load_documents(pdf_streams: list[bytes], lesson_id: str, pdf_filenames: list[str], pdfs_url: list[str]):
@@ -62,6 +62,7 @@ def split_documents(documents: list[Document]):
     return text_splitter.split_documents(documents)
 
 def add_to_chroma(chunks: list[Document]):
+    if "embedding_model" not in st.session_state: st.session_state.embedding_model = pull_model()
     client = chromadb.HttpClient(
         settings=Settings(
             chroma_api_impl="rest",
@@ -72,7 +73,7 @@ def add_to_chroma(chunks: list[Document]):
         host=st.secrets["AWS_IP_ADDR"],
         port=8000
     )
-    db = Chroma(embedding_function=get_embedding_function(), client=client, collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
+    db = Chroma(embedding_function=st.session_state.embedding_model, client=client, collection_name=COLLECTION_NAME, persist_directory=CHROMA_PATH)
 
     # Calculate Page IDs.
     chunks_with_ids = calculate_chunk_ids(chunks)
