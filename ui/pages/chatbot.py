@@ -4,8 +4,8 @@ import time
 from utils import *
 import streamlit as st
 
-import pysqlite3
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# import pysqlite3
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from retriever import rag_pipeline, retriever_setup, create_retriever
@@ -95,31 +95,43 @@ def main():
 
     # Accept user input
     if prompt := st.chat_input("Ask about OS"):
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        # Display user message in chat message container
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        response, st.session_state.chat_history, sources, relevance_scores = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key, st.session_state.chat_history)
-
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            messagePlaceholder = st.empty()
+        if len(prompt) > 1000:
             typedResponse = ""
-
-            if response:
-                sources_html = gen_sources(sources, relevance_scores)
-                response_end = len(response)
-                full_response = response + sources_html
-                for i, char in enumerate(full_response):
+            too_long = "Input message too long"
+            with st.chat_message("user"):
+                st.markdown(prompt)
+            with st.chat_message("assistant"):
+                messagePlaceholder = st.empty()
+                for char in too_long:
                     typedResponse += char
                     messagePlaceholder.markdown(typedResponse, unsafe_allow_html=True)
-                    if i < response_end:
-                        time.sleep(0.001)
+                    time.sleep(0.005)
+        else:
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            # Display user message in chat message container
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response + sources_html})
+            response, st.session_state.chat_history, sources, relevance_scores = rag_pipeline(prompt, st.session_state.retriever, st.session_state.groq_api_key, st.session_state.chat_history)
+
+            # Display assistant response in chat message container
+            with st.chat_message("assistant"):
+                messagePlaceholder = st.empty()
+                typedResponse = ""
+
+                if response:
+                    sources_html = gen_sources(sources, relevance_scores)
+                    response_end = len(response)
+                    full_response = response + sources_html
+                    for i, char in enumerate(full_response):
+                        typedResponse += char
+                        messagePlaceholder.markdown(typedResponse, unsafe_allow_html=True)
+                        if i < response_end:
+                            time.sleep(0.001)
+
+            # Add assistant response to chat history
+            st.session_state.messages.append({"role": "assistant", "content": response + sources_html})
 
 if __name__ == "__main__":
     main()
