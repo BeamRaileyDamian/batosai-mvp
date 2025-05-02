@@ -25,7 +25,7 @@ def main():
                 
                 col1, col2, col3 = st.columns([1, 1, 10])
                 with col1:
-                    if st.button("Update", key=f"update_{i}"):
+                    if st.button("Save", key=f"update_{i}"):
                         quiz_items[i] = {"question": edited_question, "answer": edited_answer}
                         st.session_state.lect_script_to_edit["quiz"] = quiz_items
                         st.rerun()

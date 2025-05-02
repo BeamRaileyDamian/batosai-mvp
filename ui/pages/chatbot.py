@@ -4,8 +4,8 @@ import time
 from utils import *
 import streamlit as st
 
-# import pysqlite3
-# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+import pysqlite3
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
 from retriever import rag_pipeline, retriever_setup, create_retriever
@@ -50,7 +50,6 @@ def gen_sources(sources, relevance_scores):
 
     sources_html += "</div>"
     return sources_html
-
 
 def change_scope():
     new_collection = st.session_state.selected_lect_id

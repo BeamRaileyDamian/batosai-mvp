@@ -33,7 +33,7 @@ def main():
                 
                 col1, col2, col3 = st.columns([1, 1, 10])
                 with col1:
-                    if st.button("Update", key=f"update_{i}"):
+                    if st.button("Save", key=f"update_{i}"):
                         if edited_quote != original_quote:
                             st.session_state.quotes[i]["data"]["quote"] = edited_quote
                             if "id" in st.session_state.quotes[i]:
