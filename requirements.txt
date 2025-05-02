@@ -2,6 +2,7 @@ pydub
 pymupdf
 supabase
 streamlit
+pytesseract
 speechify-api
 firebase_admin
 langchain_groq
